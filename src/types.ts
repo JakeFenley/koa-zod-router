@@ -1,4 +1,4 @@
-import { OutputValidator } from './output-validator';
+import { Context, Next } from 'koa';
 
 export type Method =
   | 'acl'
@@ -78,16 +78,19 @@ export type RouterMethodFn = (path: string) => void;
 export type RouterMethods = {
   [key in Method]: RouterMethodFn;
 };
+type Handler = (ctx: Context, next: Next) => void;
 
 export type Spec = {
   path: string;
-  method: Method[];
+  handler: Handler | Handler[];
+  method: Method;
+  pre: Handler | Handler[];
   validate: {
     body: Record<string, any>;
     // TODO see if we can get rid of type and auto-detect with zod maybe
-    type: string;
+    type: 'json' | 'form' | 'multipart' | 'stream';
     output: any;
     failure: number;
-    outputValidator: ReturnType<OutputValidator>;
+    multipartOptions: Record<string, any>;
   };
 };

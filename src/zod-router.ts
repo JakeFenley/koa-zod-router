@@ -1,73 +1,36 @@
 import { Method, methods, Route, RouterMethods, Spec } from './types';
 import KoaRouter, { Middleware } from '@koa/router';
 import Router from '@koa/router';
-import assert from 'assert';
-import outputValidator from './output-validator';
-import { flatten } from './util/index';
+import { flatten, specExposer } from './util/index';
+import koaBody from 'koa-body';
 
 const router = () => {
   const _routes: Route[] = [];
   const _router = new KoaRouter();
+  _router.use(koaBody());
 
   const middleware = () => {
     return _router.routes();
   };
 
-  const checkValidators = (spec: Spec) => {
-    if (!spec.validate) return;
-
-    let text;
-    if (spec.validate.body) {
-      text = 'validate.type must be declared when using validate.body';
-      assert(/json|form/.test(spec.validate.type), text);
-    }
-
-    if (spec.validate.type) {
-      text = 'validate.type must be either json, form, multipart or stream';
-      assert(/json|form|multipart|stream/i.test(spec.validate.type), text);
-    }
-
-    if (spec.validate.output) {
-      spec.validate.outputValidator = outputValidator(spec.validate.output);
-    }
-
-    // default HTTP status code for failures
-    if (!spec.validate.failure) {
-      spec.validate.failure = 400;
-    }
-  };
-
-  const _validateRouteSpec = (spec: Spec) => {
-    checkHandler(spec);
-    checkPreHandler(spec);
-    checkMethods(spec);
-    checkValidators(spec);
-  };
-
   const _addRoute = (spec: Spec): void => {
-    _validateRouteSpec(spec);
     _routes.push(spec);
 
     // debug('add %s "%s"', spec.method, spec.path);
 
-    const bodyParser = makeBodyParser(spec);
-    const specExposer = makeSpecExposer(spec);
-    const validator = makeValidator(spec);
     const preHandlers = spec.pre ? flatten(spec.pre) : [];
     const handlers = flatten(spec.handler);
 
-    const args = [spec.path].concat(preHandlers, [prepareRequest, specExposer, bodyParser, validator], handlers);
-
-    spec.method.forEach((method) => {
-      // koa types are missing a few type definitions here
-      // @ts-ignore
-      _router[method].apply(_router, args);
-    });
+    // koa types are missing a few type definitions here
+    // @ts-ignore
+    _router[spec.method].apply(_router, spec.path, preHandlers, specExposer(spec), validator(spec), handlers);
   };
 
   const route = (spec: Spec): void => {
     if (Array.isArray(spec)) {
-      spec.forEach((route) => _addRoute(route));
+      spec.forEach((route) => {
+        return _addRoute(route);
+      });
     } else {
       _addRoute(spec);
     }

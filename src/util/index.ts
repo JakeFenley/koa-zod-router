@@ -1,7 +1,6 @@
+import { Context, Next } from 'koa';
+import { cloneDeep } from 'lodash';
 import { Spec } from 'src/types';
-import busboy from 'busboy';
-import { Context } from 'koa';
-import { RouterContext } from '@koa/router';
 
 function recursiveFlatten(array: Array<any>): Array<any> {
   return array.reduce((acc, curr) => {
@@ -20,15 +19,30 @@ export const flatten = <T>(input: Array<any> | T): Array<any> | T => {
   }
 };
 
-function makeMultipartParser(spec: Spec) {
-  const opts = spec.validate.multipartOptions || {};
-  if (typeof opts.autoFields === 'undefined') {
-    opts.autoFields = true;
-  }
-  return async function parseMultipart(ctx: RouterContext) {
-    if (!ctx.request.is('multipart/*')) {
-      return ctx.throw(400, 'expected multipart');
-    }
-    ctx.request.parts = busboy(ctx, opts);
-  };
+export async function noopMiddleware(ctx: Context, next: Next) {
+  return await next();
 }
+
+export const specExposer = (spec: Spec) => {
+  const specCopy = cloneDeep(spec);
+  return async (ctx: Context, next: Next) => {
+    ctx.state.route = specCopy;
+    await next();
+  };
+};
+
+const validator = (spec: Spec) => {
+  const props = ['header', 'query', 'params', 'body'];
+
+  return async (ctx: Context, next: Next) => {
+    if (!spec.validate) {
+      return await next();
+    }
+
+    // implement input validations here
+
+    await next();
+
+    // implement output validations here
+  };
+};
