@@ -1,6 +1,6 @@
-import { Method, methods, Route, RouterMethods, Spec } from './types';
+import { Method, methods, RouterMethods, Spec } from './types';
 import KoaRouter from '@koa/router';
-import { prepareMiddleware, validator } from './util/index';
+import { prepareMiddleware, validationMiddleware } from './util/index';
 import koaBody from 'koa-body';
 
 type ZodRouter = ReturnType<typeof zodRouter>;
@@ -19,14 +19,13 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
     param,
     params,
     redirect,
-    // needs wrapper
-    register,
+    route,
     routes,
     use,
   } = _router;
 
   const self = {
-    ...routerMethods(),
+    ...makeRouteMethods(),
     get router(): KoaRouter {
       return _router;
     },
@@ -46,32 +45,23 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
     use,
   } as const;
 
-  function _addRoute(spec: Spec) {
-    _router[spec.method].apply(_router, [
-      spec.path,
-      ...prepareMiddleware(spec.pre),
-      validator(spec),
-      ...prepareMiddleware(spec.handlers),
-    ]);
-  }
-
   function middleware() {
     return _router.routes();
   }
 
-  function route(spec: Spec): ZodRouter {
-    if (Array.isArray(spec)) {
-      spec.forEach((route) => {
-        return _addRoute(route);
-      });
-    } else {
-      _addRoute(spec);
-    }
+  function register(spec: Spec): ZodRouter {
+    const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
+
+    _router.register(spec.path, methodsParam, [
+      ...prepareMiddleware(spec.pre),
+      validationMiddleware(spec),
+      ...prepareMiddleware(spec.handlers),
+    ]);
 
     return self;
   }
 
-  function routerMethods() {
+  function makeRouteMethods() {
     return methods.reduce((acc: RouterMethods, method: Method) => {
       acc[method] = function (path: string) {
         let fns;
@@ -85,14 +75,15 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
           fns = Array.prototype.slice.call(arguments, 2);
         }
 
+        // TODO add prehandlers
         const spec = {
-          path: path,
-          method: method.toLowerCase(),
+          path,
+          method,
           handler: fns,
           ...config,
         };
 
-        _addRoute(spec);
+        register(spec);
 
         return self;
       };

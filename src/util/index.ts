@@ -26,10 +26,11 @@ export async function noopMiddleware(ctx: Context, next: Next) {
   return await next();
 }
 
-export const validator = (spec: Spec) => {
+export const validationMiddleware = (spec: Spec) => {
   const props = ['header', 'query', 'params', 'body'];
 
   return async (ctx: Context, next: Next) => {
+    console.log('validator middleware');
     if (!spec.validate) {
       return await next();
     }
