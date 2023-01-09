@@ -1,77 +1,19 @@
-import { Context, Next } from 'koa';
+import { Context, Middleware, Next } from 'koa';
 
 export type Method =
-  | 'acl'
-  | 'bind'
-  | 'checkout'
-  | 'connect'
-  | 'copy'
+  | 'all'
+  | 'del'
   | 'delete'
   | 'get'
   | 'head'
   | 'link'
-  | 'lock'
-  | 'm-search'
-  | 'merge'
-  | 'mkactivity'
-  | 'mkcalendar'
-  | 'mkcol'
-  | 'move'
-  | 'notify'
   | 'options'
   | 'patch'
   | 'post'
-  | 'propfind'
-  | 'proppatch'
-  | 'purge'
   | 'put'
-  | 'rebind'
-  | 'report'
-  | 'search'
-  | 'source'
-  | 'subscribe'
-  | 'trace'
-  | 'unbind'
-  | 'unlink'
-  | 'unlock'
-  | 'unsubscribe';
+  | 'unlink';
 
-export const methods: Method[] = [
-  'acl',
-  'bind',
-  'checkout',
-  'connect',
-  'copy',
-  'delete',
-  'get',
-  'head',
-  'link',
-  'lock',
-  'm-search',
-  'merge',
-  'mkactivity',
-  'mkcalendar',
-  'mkcol',
-  'move',
-  'notify',
-  'options',
-  'patch',
-  'post',
-  'propfind',
-  'proppatch',
-  'purge',
-  'put',
-  'rebind',
-  'report',
-  'search',
-  'source',
-  'subscribe',
-  'trace',
-  'unbind',
-  'unlink',
-  'unlock',
-  'unsubscribe',
-];
+export const methods: Method[] = ['all', 'delete', 'get', 'head', 'link', 'options', 'patch', 'post', 'put', 'unlink'];
 
 export type Route = any;
 export type RouterMethodFn = (path: string) => void;
@@ -82,15 +24,14 @@ type Handler = (ctx: Context, next: Next) => void;
 
 export type Spec = {
   path: string;
-  handler: Handler | Handler[];
+  handlers: Middleware | Middleware[];
   method: Method;
-  pre: Handler | Handler[];
-  validate: {
-    body: Record<string, any>;
+  pre?: Middleware | Middleware[];
+  validate?: {
+    body?: Record<string, any>;
     // TODO see if we can get rid of type and auto-detect with zod maybe
-    type: 'json' | 'form' | 'multipart' | 'stream';
-    output: any;
-    failure: number;
-    multipartOptions: Record<string, any>;
+    type?: 'json' | 'form' | 'multipart' | 'stream';
+    output?: any;
+    failure?: number;
   };
 };

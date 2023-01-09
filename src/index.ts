@@ -1,10 +1,25 @@
 import Koa from 'koa';
-import KoaRouter from '@koa/router';
+import zodRouter from './zod-router';
 
 const app = new Koa();
 
-app.use(async (ctx) => {
-  ctx.body = 'Hello World';
+const router = zodRouter();
+
+// TODO: Fix this
+// router.get('/', {
+
+// })
+
+router.route({
+  method: 'get',
+  path: '/',
+  handlers: (ctx, next) => {
+    ctx.body = 'hello';
+  },
 });
 
-app.listen(3000);
+app.use(router.middleware());
+
+app.listen(3000, () => {
+  console.log('app listening on http://localhost:3000');
+});
