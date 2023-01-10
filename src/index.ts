@@ -3,10 +3,17 @@ import zodRouter from './zod-router';
 
 const app = new Koa();
 
-const router = zodRouter();
+const router = zodRouter({ methods: ['get'] });
 
-// TODO: Fix this need to add
-router.get('/', (ctx, next) => {});
+router.get(
+  '/',
+  (ctx, next) => {
+    console.log('handler');
+    ctx.body = 'DFASFASAS';
+    next();
+  },
+  {},
+);
 
 // router.register({
 //   method: 'get',
@@ -28,7 +35,7 @@ router.get('/', (ctx, next) => {});
 //   ],
 // });
 
-app.use(router.middleware());
+app.use(router.routes());
 
 app.listen(3000, () => {
   console.log('app listening on http://localhost:3000');

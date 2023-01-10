@@ -2,6 +2,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "lib": ["es2022"],
+    "declaration": true,
     "rootDir": "src",
     "target": "ES2022",
     "module": "NodeNext",

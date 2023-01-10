@@ -1,37 +1,41 @@
-import { Context, Middleware, Next } from 'koa';
+import Router from '@koa/router';
+import { Middleware } from 'koa';
+import zodRouter from './zod-router';
 
-export type Method =
-  | 'all'
-  | 'del'
-  | 'delete'
-  | 'get'
-  | 'head'
-  | 'link'
-  | 'options'
-  | 'patch'
-  | 'post'
-  | 'put'
-  | 'unlink';
+export type Method = 'delete' | 'get' | 'head' | 'link' | 'options' | 'patch' | 'post' | 'put' | 'unlink';
 
-export const methods: Method[] = ['all', 'delete', 'get', 'head', 'link', 'options', 'patch', 'post', 'put', 'unlink'];
-
-export type Route = any;
-export type RouterMethodFn = (path: string, handlers: Middleware | Middleware[]) => void;
-export type RouterMethods = {
-  [key in Method]: RouterMethodFn;
+// TODO implement zod types
+export type ValidationOptions = {
+  body?: Record<string, any>;
+  // TODO see if we can get rid of type and auto-detect with zod maybe
+  type?: 'json' | 'form' | 'multipart' | 'stream';
+  output?: any;
+  failure?: number;
 };
-type Handler = (ctx: Context, next: Next) => void;
 
 export type Spec = {
-  path: string;
   handlers: Middleware | Middleware[];
-  method: Method;
+  name?: string;
+  path: string;
   pre?: Middleware | Middleware[];
-  validate?: {
-    body?: Record<string, any>;
-    // TODO see if we can get rid of type and auto-detect with zod maybe
-    type?: 'json' | 'form' | 'multipart' | 'stream';
-    output?: any;
-    failure?: number;
-  };
+  validate?: ValidationOptions;
 };
+
+export type RegisterSpec = {
+  method: Method;
+} & Spec;
+
+declare function RouterMethodFn(
+  path: string,
+  handlers: Middleware | Middleware[],
+  validationOptions?: ValidationOptions,
+): Router;
+declare function RouterMethodFn(spec: Spec): Router;
+
+export type RouterMethod = typeof RouterMethodFn;
+
+export type RouterMethods = {
+  [key in Method]: RouterMethod;
+};
+
+export type ZodRouter = ReturnType<typeof zodRouter>;
