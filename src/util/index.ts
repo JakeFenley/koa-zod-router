@@ -1,5 +1,5 @@
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { RegisterSpec, Spec, ValidationOptions, ZodContext } from 'src/types';
+import { RegisterSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from 'src/types';
 
 function flatten(array: Array<any>): Array<any> {
   return array.reduce((acc, curr) => {
@@ -10,11 +10,9 @@ function flatten(array: Array<any>): Array<any> {
   }, []);
 }
 
-export const prepareMiddleware = <ParamsType, QueryType, BodyType, ResponseType>(
-  input?:
-    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
-    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[],
-): Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[] => {
+export const prepareMiddleware = <Params, Query, Body, Response>(
+  input?: ZodMiddleware<Params, Query, Body, Response>,
+): Middleware<DefaultState, ZodContext<Params, Query, Body, Response>>[] => {
   if (!input) {
     return [];
   }
@@ -76,11 +74,9 @@ export const assertPath = (val: any): val is string | RegExp | Array<string | Re
   return false;
 };
 
-export const assertSpec = <ParamsType, QueryType, BodyType, ResponseType>(
+export const assertSpec = <Params, Query, Body, Response>(
   val: any,
-): val is
-  | Spec<ParamsType, QueryType, BodyType, ResponseType>
-  | RegisterSpec<ParamsType, QueryType, BodyType, ResponseType> => {
+): val is Spec<Params, Query, Body, Response> | RegisterSpec<Params, Query, Body, Response> => {
   if (typeof val === 'object' && val['path']) {
     return true;
   }
@@ -88,11 +84,10 @@ export const assertSpec = <ParamsType, QueryType, BodyType, ResponseType>(
   return false;
 };
 
-export const assertValidation = <ParamsType, QueryType, BodyType, ResponseType>(
+export const assertValidation = <Params, Query, Body, Response>(
   val: any,
-): val is ValidationOptions<ParamsType, QueryType, BodyType, ResponseType> => {
-  // TODO check these later
-  const props = ['body', 'query', 'output', 'failure', 'type'];
+): val is ValidationOptions<Params, Query, Body, Response> => {
+  const props = ['body', 'query', 'params', 'response'];
 
   if (typeof val === 'object') {
     for (const prop of props) {

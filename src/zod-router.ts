@@ -1,10 +1,46 @@
-import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, methods, ZodContext } from './types';
+import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, ZodMiddleware } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware } from './util/index';
-import { DefaultState, Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
-import { validationMiddleware } from './validator';
+import { validationMiddleware } from './validation-middleware';
+
+const methods: Method[] = [
+  'acl',
+  'bind',
+  'checkout',
+  'connect',
+  'copy',
+  'delete',
+  'get',
+  'head',
+  'link',
+  'lock',
+  'm-search',
+  'merge',
+  'mkactivity',
+  'mkcalendar',
+  'mkcol',
+  'move',
+  'notify',
+  'options',
+  'patch',
+  'post',
+  'propfind',
+  'proppatch',
+  'purge',
+  'put',
+  'rebind',
+  'report',
+  'search',
+  'source',
+  'subscribe',
+  'trace',
+  'unbind',
+  'unlink',
+  'unlock',
+  'unsubscribe',
+];
 
 const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
   const _router = new KoaRouter(routerOpts);
@@ -76,11 +112,11 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
    */
 
   function register<
-    ParamsType = Record<string, any>,
-    QueryType = Record<string, any>,
-    BodyType = Record<string, any>,
-    ResponseType = Record<string, any>,
-  >(spec: RegisterSpec<ParamsType, QueryType, BodyType, ResponseType>) {
+    Params = Record<string, any>,
+    Query = Record<string, any>,
+    Body = Record<string, any>,
+    Response = Record<string, any>,
+  >(spec: RegisterSpec<Params, Query, Body, Response>) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
     const name = spec.name ? spec.name : null;
@@ -90,9 +126,9 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
       [
-        ...prepareMiddleware<ParamsType, QueryType, BodyType, ResponseType>(spec.pre),
+        ...prepareMiddleware<Params, Query, Body, Response>(spec.pre),
         validationMiddleware(spec.validate),
-        ...prepareMiddleware<ParamsType, QueryType, BodyType, ResponseType>(spec.handlers),
+        ...prepareMiddleware<Params, Query, Body, Response>(spec.handlers),
       ],
       { name },
     );
@@ -102,12 +138,10 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
 
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
-      acc[method] = <ParamsType, QueryType, BodyType, ResponseType>(
-        pathOrSpec: string | Spec<ParamsType, QueryType, BodyType, ResponseType>,
-        handlers?:
-          | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
-          | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[],
-        validationOptions?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
+      acc[method] = <Params, Query, Body, Response>(
+        pathOrSpec: string | Spec<Params, Query, Body, Response>,
+        handlers?: ZodMiddleware<Params, Query, Body, Response>,
+        validationOptions?: ValidationOptions<Params, Query, Body, Response>,
       ) => {
         if (typeof pathOrSpec === 'string' && handlers) {
           register({
