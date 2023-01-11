@@ -105,11 +105,11 @@ export type ValidationOptions<ParamsType, QueryType, BodyType, ResponseType> = {
 };
 
 export type Spec<ParamsType, QueryType, BodyType, ResponseType> = {
+  name?: string;
+  path: string;
   handlers:
     | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
     | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[];
-  name?: string;
-  path: string;
   pre?:
     | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
     | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[];

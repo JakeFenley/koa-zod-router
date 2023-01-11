@@ -1,7 +1,7 @@
-import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, methods } from './types';
+import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, methods, ZodContext } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware } from './util/index';
-import { Middleware } from 'koa';
+import { DefaultState, Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validator';
@@ -104,7 +104,9 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
     methods.reduce((acc: RouterMethods, method: Method) => {
       acc[method] = <ParamsType, QueryType, BodyType, ResponseType>(
         pathOrSpec: string | Spec<ParamsType, QueryType, BodyType, ResponseType>,
-        handlers?: Middleware | Middleware[],
+        handlers?:
+          | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
+          | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[],
         validationOptions?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
       ) => {
         if (typeof pathOrSpec === 'string' && handlers) {
