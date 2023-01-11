@@ -1,15 +1,20 @@
-import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethod } from './types';
+import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethod, RouterMethods, methods } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware, validationMiddleware } from './util/index';
 import koaBody from 'koa-body';
 import { Middleware } from 'koa';
 import Router from '@koa/router';
+import { z } from 'zod';
 
 const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
   const _router = new KoaRouter(routerOpts);
   _router.use(koaBody());
 
   // Delegated methods - preserves value of 'this' in KoaRouter
+  function all(...args: any[]) {
+    return _router.all(args);
+  }
+
   function allowedMethods(options?: KoaRouter.RouterAllowedMethodsOptions) {
     return _router.allowedMethods(options);
   }
@@ -51,41 +56,23 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
   }
 
   /**
-   * Register route with all methods.
-   */
-  function all(spec: Spec) {
-    const middlewares = [
-      ...prepareMiddleware(spec.pre),
-      validationMiddleware(spec.validate),
-      ...prepareMiddleware(spec.handlers),
-      // Type assertion as @types/koa__router doesn't annotate the middlewares param to allow for middleware arrays (they are supported by the lib)
-    ] as unknown as Middleware;
-
-    if (spec.name) {
-      _router.all(spec.path, spec.name, middlewares);
-    } else {
-      _router.all(spec.path, middlewares);
-    }
-
-    return _router;
-  }
-
-  /**
-   * Create and register a route.
+   * Create and register a route
    *
-   * Example:
-   *  register({
-   *  path: '/users',
-   *  method: 'post',
-   *  handlers: async (ctx, next) => {
-   *    ctx.body = { success: true };
-   *    await next();
-   *  },
-   *  validate: {
-   *    body: z.object({ email: z.string() }),
-   *    output: z.object({ success: z.boolean() }),
-   *  },
-   * });
+   * @example
+   *
+   * ```javascript
+   *  router.register({
+   *    path: '/',
+   *    method: 'get',
+   *    handlers: (ctx, next) => {
+   *      ctx.body = 'Hello world';
+   *      next();
+   *     },
+   *     validate: {
+   *       output: z.string(),
+   *     },
+   *  });
+   * ```
    */
 
   function register(spec: RegisterSpec) {
@@ -103,96 +90,50 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
     return _router;
   }
 
-  function _httpMethodFactory(method: Method): RouterMethod {
-    return (pathOrSpec: string | Spec, handlers?: Middleware | Middleware[], validationOptions?: ValidationOptions) => {
-      if (typeof pathOrSpec === 'string' && handlers) {
-        register({
-          method,
-          path: pathOrSpec,
-          handlers,
-          validate: validationOptions,
-        });
+  const makeRouteMethods = () =>
+    methods.reduce((acc: RouterMethods, method: Method) => {
+      acc[method] = (
+        pathOrSpec: string | Spec,
+        handlers?: Middleware | Middleware[],
+        validationOptions?: ValidationOptions,
+      ) => {
+        if (typeof pathOrSpec === 'string' && handlers) {
+          register({
+            method,
+            path: pathOrSpec,
+            handlers,
+            validate: validationOptions,
+          });
 
-        return _router;
-      }
+          return _router;
+        }
 
-      if (typeof pathOrSpec === 'object') {
-        register({
-          ...pathOrSpec,
-          method,
-        });
+        if (typeof pathOrSpec === 'object') {
+          register({
+            ...pathOrSpec,
+            method,
+          });
 
-        return _router;
-      }
+          return _router;
+        }
 
-      throw new Error('Invalid route arguments');
-    };
-  }
+        throw new Error('Invalid route arguments');
+      };
 
-  /**
-   * HTTP Get Method
-   */
-  const get = _httpMethodFactory('get');
-
-  /**
-   * HTTP Delete Method
-   */
-  const deleteMethod = _httpMethodFactory('delete');
-
-  /**
-   * HTTP Head Method
-   */
-  const head = _httpMethodFactory('head');
-
-  /**
-   * HTTP Link Method
-   */
-  const link = _httpMethodFactory('link');
-
-  /**
-   * HTTP Options Method
-   */
-  const options = _httpMethodFactory('options');
-
-  /**
-   * HTTP Patch Method
-   */
-  const patch = _httpMethodFactory('patch');
-
-  /**
-   * HTTP Post Method
-   */
-  const post = _httpMethodFactory('post');
-
-  /**
-   * HTTP Put Method
-   */
-  const put = _httpMethodFactory('put');
-
-  /**
-   * HTTP Unlink Method
-   */
-  const unlink = _httpMethodFactory('unlink');
+      return acc;
+    }, {} as RouterMethods);
 
   return {
+    ...makeRouteMethods(),
     get router() {
       return _router;
     },
-    all,
-    get,
-    delete: deleteMethod,
-    head,
-    link,
-    options,
-    patch,
-    post,
-    put,
     register,
-    unlink,
     // Delegated methods - we preserve KoaRouter type definitions with assertions
+    all: all as Router['all'],
     allowedMethods: allowedMethods as Router['allowedMethods'],
     match: match as Router['match'],
-    methods: _router.methods,
+    methods: _router.methods as Router['methods'],
     middleware: middleware as Router['middleware'],
     opts: _router.opts,
     param: param as Router['param'],

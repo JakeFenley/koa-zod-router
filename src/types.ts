@@ -1,8 +1,79 @@
-import Router from '@koa/router';
+import Router, { LayerOptions } from '@koa/router';
 import { Middleware } from 'koa';
 import zodRouter from './zod-router';
 
-export type Method = 'delete' | 'get' | 'head' | 'link' | 'options' | 'patch' | 'post' | 'put' | 'unlink';
+export type Method =
+  | 'acl'
+  | 'bind'
+  | 'checkout'
+  | 'connect'
+  | 'copy'
+  | 'delete'
+  | 'get'
+  | 'head'
+  | 'link'
+  | 'lock'
+  | 'm-search'
+  | 'merge'
+  | 'mkactivity'
+  | 'mkcalendar'
+  | 'mkcol'
+  | 'move'
+  | 'notify'
+  | 'options'
+  | 'patch'
+  | 'post'
+  | 'propfind'
+  | 'proppatch'
+  | 'purge'
+  | 'put'
+  | 'rebind'
+  | 'report'
+  | 'search'
+  | 'source'
+  | 'subscribe'
+  | 'trace'
+  | 'unbind'
+  | 'unlink'
+  | 'unlock'
+  | 'unsubscribe';
+
+export const methods: Method[] = [
+  'acl',
+  'bind',
+  'checkout',
+  'connect',
+  'copy',
+  'delete',
+  'get',
+  'head',
+  'link',
+  'lock',
+  'm-search',
+  'merge',
+  'mkactivity',
+  'mkcalendar',
+  'mkcol',
+  'move',
+  'notify',
+  'options',
+  'patch',
+  'post',
+  'propfind',
+  'proppatch',
+  'purge',
+  'put',
+  'rebind',
+  'report',
+  'search',
+  'source',
+  'subscribe',
+  'trace',
+  'unbind',
+  'unlink',
+  'unlock',
+  'unsubscribe',
+];
 
 // TODO implement zod types
 export type ValidationOptions = {
@@ -23,6 +94,7 @@ export type Spec = {
 
 export type RegisterSpec = {
   method: Method;
+  opts?: LayerOptions;
 } & Spec;
 
 declare function RouterMethodFn(
