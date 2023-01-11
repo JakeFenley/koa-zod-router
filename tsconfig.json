@@ -12,7 +12,8 @@
     "sourceMap": true,
     "outDir": "./dist",
     "typeRoots": ["src/@types"],
-    "strict": true
+    "strict": true,
+    "rootDirs": ["src"]
   },
   "include": ["src", "test", "tmp/zod-route-handler.ts"],
   "exclude": ["node_modules", "dist"]

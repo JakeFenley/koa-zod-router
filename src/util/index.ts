@@ -1,6 +1,6 @@
 import { Context, DefaultState, Middleware, Next, ParameterizedContext } from 'koa';
 import { RegisterSpec, Spec, ValidationOptions } from 'src/types';
-import { ParameterizedRequest, ZodContext } from 'src/validator';
+import { ZodContext } from 'src/validator';
 
 function flatten(array: Array<any>): Array<any> {
   return array.reduce((acc, curr) => {
@@ -11,9 +11,11 @@ function flatten(array: Array<any>): Array<any> {
   }, []);
 }
 
-export const prepareMiddleware = <BodyType>(
-  input?: Middleware<DefaultState, ZodContext<BodyType>> | Middleware<DefaultState, ZodContext<BodyType>>[],
-): Middleware<DefaultState, ZodContext<BodyType>>[] => {
+export const prepareMiddleware = <ParamsType, QueryType, BodyType, ResponseType>(
+  input?:
+    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
+    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[],
+): Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[] => {
   if (!input) {
     return [];
   }
@@ -29,7 +31,9 @@ export async function noopMiddleware(ctx: Context, next: Next) {
   return await next();
 }
 
-export const validationMiddleware = (validation?: ValidationOptions) => {
+export const validationMiddleware = <ParamsType, QueryType, BodyType, ResponseType>(
+  validation?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
+) => {
   if (!validation) {
     return noopMiddleware;
   }
@@ -93,7 +97,11 @@ export const assertPath = (val: any): val is string | RegExp | Array<string | Re
   return false;
 };
 
-export const assertSpec = <BodyType>(val: any): val is Spec<BodyType> | RegisterSpec<BodyType> => {
+export const assertSpec = <ParamsType, QueryType, BodyType, ResponseType>(
+  val: any,
+): val is
+  | Spec<ParamsType, QueryType, BodyType, ResponseType>
+  | RegisterSpec<ParamsType, QueryType, BodyType, ResponseType> => {
   if (typeof val === 'object' && val['path']) {
     return true;
   }
@@ -101,7 +109,9 @@ export const assertSpec = <BodyType>(val: any): val is Spec<BodyType> | Register
   return false;
 };
 
-export const assertValidation = (val: any): val is ValidationOptions => {
+export const assertValidation = <ParamsType, QueryType, BodyType, ResponseType>(
+  val: any,
+): val is ValidationOptions<ParamsType, QueryType, BodyType, ResponseType> => {
   // TODO check these later
   const props = ['body', 'query', 'output', 'failure', 'type'];
 

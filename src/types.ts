@@ -1,5 +1,6 @@
 import Router, { LayerOptions } from '@koa/router';
 import { DefaultState, Middleware } from 'koa';
+import z, { ZodSchema } from 'zod';
 import { ZodContext } from './validator';
 import zodRouter from './zod-router';
 
@@ -76,34 +77,42 @@ export const methods: Method[] = [
   'unsubscribe',
 ];
 
-// TODO implement zod types
-export type ValidationOptions = {
-  body?: Record<string, any>;
-  // TODO see if we can get rid of type and auto-detect with zod maybe
-  type?: 'json' | 'form' | 'multipart' | 'stream';
-  output?: any;
-  failure?: number;
+type RequireKeys<T> = {
+  [P in keyof Required<T>]: Pick<T, P> extends Required<Pick<T, P>> ? T[P] : T[P] | undefined;
 };
 
-export type Spec<BodyType> = {
-  handlers: Middleware<DefaultState, ZodContext<BodyType>> | Middleware<DefaultState, ZodContext<BodyType>>[];
+export type InferedSchema<T> = z.infer<ZodSchema<T>>;
+
+export type ValidationOptions<ParamsType, QueryType, BodyType, ResponseType> = {
+  params?: ZodSchema<ParamsType>;
+  query?: ZodSchema<QueryType>;
+  body?: ZodSchema<BodyType>;
+  response?: ZodSchema<ResponseType>;
+};
+
+export type Spec<ParamsType, QueryType, BodyType, ResponseType> = {
+  handlers:
+    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
+    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[];
   name?: string;
   path: string;
   pre?: Middleware | Middleware[];
-  validate?: ValidationOptions;
+  validate?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>;
 };
 
-export type RegisterSpec<BodyType> = {
+export type RegisterSpec<ParamsType, QueryType, BodyType, ResponseType> = {
   method: Method;
   opts?: LayerOptions;
-} & Spec<BodyType>;
+} & Spec<ParamsType, QueryType, BodyType, ResponseType>;
 
-declare function RouterMethodFn(
+declare function RouterMethodFn<ParamsType, QueryType, BodyType, ResponseType>(
   path: string,
   handlers: Middleware | Middleware[],
-  validationOptions?: ValidationOptions,
+  validationOptions?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
 ): Router;
-declare function RouterMethodFn<BodyType>(spec: Spec<BodyType>): Router;
+declare function RouterMethodFn<ParamsType, QueryType, BodyType, ResponseType>(
+  spec: Spec<ParamsType, QueryType, BodyType, ResponseType>,
+): Router;
 
 export type RouterMethod = typeof RouterMethodFn;
 

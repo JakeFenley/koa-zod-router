@@ -28,14 +28,10 @@ export type Schema<ParamsType, QueryType, BodyType, ResponseType> = {
 // req: Request<RequireKeys<InferedSchema<ParamsType>>, any, InferedSchema<BodyType>, InferedSchema<QueryType>>,
 // res: Response<RequireKeys<InferedSchema<ResponseType>>>,
 
-export interface ParameterizedRequest<BodyType> extends BaseRequest {
-  body?: BodyType;
-}
-
-export interface ZodContext<BodyType> extends BaseContext {
+export interface ZodContext<ParamsType, QueryType, BodyType, ResponseType> {
   request: {
-    body?: BodyType;
-  } & BaseRequest;
+    body: BodyType;
+  };
 }
 
 // const ob: ZodContext<{ foo: 'bar' }> = {
@@ -43,10 +39,5 @@ export interface ZodContext<BodyType> extends BaseContext {
 //     body: { foo: 'bar' },
 //   },
 // };
-
-export type ZodTypeSafeHandler<ParamsType, QueryType, BodyType, ResponseType> = (
-  ctx: ParameterizedContext<DefaultState, ParameterizedRequest<BodyType>>,
-  next: Next,
-) => void;
 
 // type ZodTypedResponse<T> = Response & { send: (body: T) => void };

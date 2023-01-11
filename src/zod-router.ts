@@ -1,7 +1,7 @@
 import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethod, RouterMethods, methods } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware, validationMiddleware } from './util/index';
-import { Middleware } from 'koa';
+import { Middleware, Request } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 
@@ -74,7 +74,12 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
    * ```
    */
 
-  function register<BodyType>(spec: RegisterSpec<BodyType>) {
+  function register<
+    ParamsType = Record<string, any>,
+    QueryType = Record<string, any>,
+    BodyType = Record<string, any>,
+    ResponseType = Record<string, any>,
+  >(spec: RegisterSpec<ParamsType, QueryType, BodyType, ResponseType>) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
     const name = spec.name ? spec.name : null;
@@ -82,10 +87,11 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
     _router.register(
       spec.path,
       methodsParam,
+      // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
       [
-        ...prepareMiddleware<BodyType>(spec.pre),
+        ...prepareMiddleware<ParamsType, QueryType, BodyType, ResponseType>(spec.pre),
         validationMiddleware(spec.validate),
-        ...prepareMiddleware<BodyType>(spec.handlers),
+        ...prepareMiddleware<ParamsType, QueryType, BodyType, ResponseType>(spec.handlers),
       ],
       { name },
     );
@@ -95,10 +101,10 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
 
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
-      acc[method] = (
-        pathOrSpec: string | Spec,
+      acc[method] = <ParamsType, QueryType, BodyType, ResponseType>(
+        pathOrSpec: string | Spec<ParamsType, QueryType, BodyType, ResponseType>,
         handlers?: Middleware | Middleware[],
-        validationOptions?: ValidationOptions,
+        validationOptions?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
       ) => {
         if (typeof pathOrSpec === 'string' && handlers) {
           register({
