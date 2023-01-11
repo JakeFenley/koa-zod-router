@@ -19,19 +19,20 @@ router.register({
   method: 'post',
   path: '/post',
   pre: async (ctx, next) => {
-    ctx.request.body.foo;
+    //... pre-handlers
     await next();
   },
   handlers: [
     async (ctx, next) => {
       const { foo } = ctx.request.body;
-      foo;
       ctx.body = 'hello';
       await next();
     },
   ],
   validate: {
     body: z.object({ foo: z.number() }),
+    query: z.object({ bar: z.string() }),
+    headers: z.object({ 'x-test-header': z.string() }),
   },
 });
 

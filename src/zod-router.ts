@@ -112,11 +112,12 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
    */
 
   function register<
+    Headers = Record<string, any>,
     Params = Record<string, any>,
     Query = Record<string, any>,
     Body = Record<string, any>,
     Response = Record<string, any>,
-  >(spec: RegisterSpec<Params, Query, Body, Response>) {
+  >(spec: RegisterSpec<Headers, Params, Query, Body, Response>) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
     const name = spec.name ? spec.name : null;
@@ -126,9 +127,9 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
       [
-        ...prepareMiddleware<Params, Query, Body, Response>(spec.pre),
+        ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.pre),
         validationMiddleware(spec.validate),
-        ...prepareMiddleware<Params, Query, Body, Response>(spec.handlers),
+        ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.handlers),
       ],
       { name },
     );
@@ -138,10 +139,10 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
 
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
-      acc[method] = <Params, Query, Body, Response>(
-        pathOrSpec: string | Spec<Params, Query, Body, Response>,
-        handlers?: ZodMiddleware<Params, Query, Body, Response>,
-        validationOptions?: ValidationOptions<Params, Query, Body, Response>,
+      acc[method] = <Headers, Params, Query, Body, Response>(
+        pathOrSpec: string | Spec<Headers, Params, Query, Body, Response>,
+        handlers?: ZodMiddleware<Headers, Params, Query, Body, Response>,
+        validationOptions?: ValidationOptions<Headers, Params, Query, Body, Response>,
       ) => {
         if (typeof pathOrSpec === 'string' && handlers) {
           register({

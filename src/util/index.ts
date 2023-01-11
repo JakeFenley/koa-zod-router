@@ -10,9 +10,9 @@ function flatten(array: Array<any>): Array<any> {
   }, []);
 }
 
-export const prepareMiddleware = <Params, Query, Body, Response>(
-  input?: ZodMiddleware<Params, Query, Body, Response>,
-): Middleware<DefaultState, ZodContext<Params, Query, Body, Response>>[] => {
+export const prepareMiddleware = <Headers, Params, Query, Body, Response>(
+  input?: ZodMiddleware<Headers, Params, Query, Body, Response>,
+): Middleware<DefaultState, ZodContext<Headers, Params, Query, Body, Response>>[] => {
   if (!input) {
     return [];
   }
@@ -74,9 +74,9 @@ export const assertPath = (val: any): val is string | RegExp | Array<string | Re
   return false;
 };
 
-export const assertSpec = <Params, Query, Body, Response>(
+export const assertSpec = <Headers, Params, Query, Body, Response>(
   val: any,
-): val is Spec<Params, Query, Body, Response> | RegisterSpec<Params, Query, Body, Response> => {
+): val is Spec<Headers, Params, Query, Body, Response> | RegisterSpec<Headers, Params, Query, Body, Response> => {
   if (typeof val === 'object' && val['path']) {
     return true;
   }
@@ -84,9 +84,9 @@ export const assertSpec = <Params, Query, Body, Response>(
   return false;
 };
 
-export const assertValidation = <Params, Query, Body, Response>(
+export const assertValidation = <Headers, Params, Query, Body, Response>(
   val: any,
-): val is ValidationOptions<Params, Query, Body, Response> => {
+): val is ValidationOptions<Headers, Params, Query, Body, Response> => {
   const props = ['body', 'query', 'params', 'response'];
 
   if (typeof val === 'object') {

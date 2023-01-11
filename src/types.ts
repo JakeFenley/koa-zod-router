@@ -45,13 +45,7 @@ type RequireKeys<T> = {
 
 export type InferedSchema<T> = z.infer<ZodSchema<T>>;
 
-export type Schema<Params, Query, Body, Response> = {
-  params?: ZodSchema<Params>;
-  query?: ZodSchema<Query>;
-  body?: ZodSchema<Body>;
-  response?: ZodSchema<Response>;
-};
-export interface ZodContext<Params, Query, Body, Response> {
+export interface ZodContext<Headers, Params, Query, Body, Response> {
   request: {
     body: Body;
     params: Params;
@@ -59,37 +53,39 @@ export interface ZodContext<Params, Query, Body, Response> {
     response: Response;
   };
 }
-
-export type ValidationOptions<Params, Query, Body, Response> = {
+export type ValidationOptions<Headers, Params, Query, Body, Response> = {
+  headers?: ZodSchema<Headers>;
   params?: ZodSchema<Params>;
   query?: ZodSchema<Query>;
   body?: ZodSchema<Body>;
   response?: ZodSchema<Response>;
 };
 
-export type ZodMiddleware<Params, Query, Body, Response> =
-  | Middleware<DefaultState, ZodContext<Params, Query, Body, Response>>
-  | Middleware<DefaultState, ZodContext<Params, Query, Body, Response>>[];
+export type ZodMiddleware<Headers, Params, Query, Body, Response> =
+  | Middleware<DefaultState, ZodContext<Headers, Params, Query, Body, Response>>
+  | Middleware<DefaultState, ZodContext<Headers, Params, Query, Body, Response>>[];
 
-export type Spec<Params, Query, Body, Response> = {
+export type Spec<Headers, Params, Query, Body, Response> = {
   name?: string;
   path: string;
-  handlers: ZodMiddleware<Params, Query, Body, Response>;
-  pre?: ZodMiddleware<Params, Query, Body, Response>;
-  validate?: ValidationOptions<Params, Query, Body, Response>;
+  handlers: ZodMiddleware<Headers, Params, Query, Body, Response>;
+  pre?: ZodMiddleware<Headers, Params, Query, Body, Response>;
+  validate?: ValidationOptions<Headers, Params, Query, Body, Response>;
 };
 
-export type RegisterSpec<Params, Query, Body, Response> = {
+export type RegisterSpec<Headers, Params, Query, Body, Response> = {
   method: Method;
   opts?: LayerOptions;
-} & Spec<Params, Query, Body, Response>;
+} & Spec<Headers, Params, Query, Body, Response>;
 
-declare function RouterMethodFn<Params, Query, Body, Response>(
+declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
   path: string,
   handlers: Middleware | Middleware[],
-  validationOptions?: ValidationOptions<Params, Query, Body, Response>,
+  validationOptions?: ValidationOptions<Headers, Params, Query, Body, Response>,
 ): Router;
-declare function RouterMethodFn<Params, Query, Body, Response>(spec: Spec<Params, Query, Body, Response>): Router;
+declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
+  spec: Spec<Headers, Params, Query, Body, Response>,
+): Router;
 
 export type RouterMethod = typeof RouterMethodFn;
 
