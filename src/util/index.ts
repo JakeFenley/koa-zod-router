@@ -1,6 +1,5 @@
-import { Context, DefaultState, Middleware, Next, ParameterizedContext } from 'koa';
-import { RegisterSpec, Spec, ValidationOptions } from 'src/types';
-import { ZodContext } from 'src/validator';
+import { Context, DefaultState, Middleware, Next } from 'koa';
+import { RegisterSpec, Spec, ValidationOptions, ZodContext } from 'src/types';
 
 function flatten(array: Array<any>): Array<any> {
   return array.reduce((acc, curr) => {
@@ -30,26 +29,6 @@ export const prepareMiddleware = <ParamsType, QueryType, BodyType, ResponseType>
 export async function noopMiddleware(ctx: Context, next: Next) {
   return await next();
 }
-
-export const validationMiddleware = <ParamsType, QueryType, BodyType, ResponseType>(
-  validation?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
-) => {
-  if (!validation) {
-    return noopMiddleware;
-  }
-
-  const props = ['header', 'query', 'params', 'body'];
-
-  return async (ctx: Context, next: Next) => {
-    console.log('validator middleware');
-
-    // implement input validations here
-
-    await next();
-
-    // implement output validations here
-  };
-};
 
 export const assertString = (val: any): val is string => {
   return typeof val === 'string';

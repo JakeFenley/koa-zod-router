@@ -1,43 +1,23 @@
-import {
-  BaseContext,
-  BaseRequest,
-  Context,
-  DefaultContext,
-  DefaultState,
-  ExtendableContext,
-  Next,
-  ParameterizedContext,
-  Request,
-} from 'koa';
-import { SafeParseReturnType, SafeParseSuccess, ZodSchema, ZodType, ZodTypeDef, z } from 'zod';
-import type { Files } from 'formidable';
+import { Context, Next } from 'koa';
+import { ValidationOptions } from './types';
+import { noopMiddleware } from './util/index';
 
-type RequireKeys<T> = {
-  [P in keyof Required<T>]: Pick<T, P> extends Required<Pick<T, P>> ? T[P] : T[P] | undefined;
-};
+export const validationMiddleware = <ParamsType, QueryType, BodyType, ResponseType>(
+  validation?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>,
+) => {
+  if (!validation) {
+    return noopMiddleware;
+  }
 
-export type InferedSchema<T> = z.infer<ZodSchema<T>>;
+  const props = ['header', 'query', 'params', 'body'];
 
-export type Schema<ParamsType, QueryType, BodyType, ResponseType> = {
-  params?: ZodSchema<ParamsType>;
-  query?: ZodSchema<QueryType>;
-  body?: ZodSchema<BodyType>;
-  response?: ZodSchema<ResponseType>;
-};
+  return async (ctx: Context, next: Next) => {
+    console.log('validator middleware');
 
-// req: Request<RequireKeys<InferedSchema<ParamsType>>, any, InferedSchema<BodyType>, InferedSchema<QueryType>>,
-// res: Response<RequireKeys<InferedSchema<ResponseType>>>,
+    // implement input validations here
 
-export interface ZodContext<ParamsType, QueryType, BodyType, ResponseType> {
-  request: {
-    body: BodyType;
+    await next();
+
+    // implement output validations here
   };
-}
-
-// const ob: ZodContext<{ foo: 'bar' }> = {
-//   request: {
-//     body: { foo: 'bar' },
-//   },
-// };
-
-// type ZodTypedResponse<T> = Response & { send: (body: T) => void };
+};

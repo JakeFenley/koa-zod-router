@@ -6,21 +6,11 @@ const app = new Koa();
 
 const router = zodRouter({ methods: ['get'] });
 
-// router.get(
-//   '/',
-//   (ctx, next) => {
-//     ctx.request.body;
-//     console.log('handler');
-//     ctx.body = 'DFASFASAS';
-//     next();
-//   },
-//   {},
-// );
-
 router.register({
   method: 'post',
   path: '/post',
   pre: async (ctx, next) => {
+    ctx.request.body.foo;
     console.log('pre');
     await next();
   },

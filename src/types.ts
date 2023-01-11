@@ -1,7 +1,6 @@
 import Router, { LayerOptions } from '@koa/router';
 import { DefaultState, Middleware } from 'koa';
 import z, { ZodSchema } from 'zod';
-import { ZodContext } from './validator';
 import zodRouter from './zod-router';
 
 export type Method =
@@ -83,6 +82,21 @@ type RequireKeys<T> = {
 
 export type InferedSchema<T> = z.infer<ZodSchema<T>>;
 
+export type Schema<ParamsType, QueryType, BodyType, ResponseType> = {
+  params?: ZodSchema<ParamsType>;
+  query?: ZodSchema<QueryType>;
+  body?: ZodSchema<BodyType>;
+  response?: ZodSchema<ResponseType>;
+};
+export interface ZodContext<ParamsType, QueryType, BodyType, ResponseType> {
+  request: {
+    body: BodyType;
+    params: ParamsType;
+    query: QueryType;
+    response: ResponseType;
+  };
+}
+
 export type ValidationOptions<ParamsType, QueryType, BodyType, ResponseType> = {
   params?: ZodSchema<ParamsType>;
   query?: ZodSchema<QueryType>;
@@ -96,7 +110,9 @@ export type Spec<ParamsType, QueryType, BodyType, ResponseType> = {
     | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[];
   name?: string;
   path: string;
-  pre?: Middleware | Middleware[];
+  pre?:
+    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>
+    | Middleware<DefaultState, ZodContext<ParamsType, QueryType, BodyType, ResponseType>>[];
   validate?: ValidationOptions<ParamsType, QueryType, BodyType, ResponseType>;
 };
 
