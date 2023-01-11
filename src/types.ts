@@ -1,5 +1,6 @@
 import Router, { LayerOptions } from '@koa/router';
-import { Middleware } from 'koa';
+import { DefaultState, Middleware } from 'koa';
+import { ZodContext } from './validator';
 import zodRouter from './zod-router';
 
 export type Method =
@@ -84,25 +85,25 @@ export type ValidationOptions = {
   failure?: number;
 };
 
-export type Spec = {
-  handlers: Middleware | Middleware[];
+export type Spec<BodyType> = {
+  handlers: Middleware<DefaultState, ZodContext<BodyType>> | Middleware<DefaultState, ZodContext<BodyType>>[];
   name?: string;
   path: string;
   pre?: Middleware | Middleware[];
   validate?: ValidationOptions;
 };
 
-export type RegisterSpec = {
+export type RegisterSpec<BodyType> = {
   method: Method;
   opts?: LayerOptions;
-} & Spec;
+} & Spec<BodyType>;
 
 declare function RouterMethodFn(
   path: string,
   handlers: Middleware | Middleware[],
   validationOptions?: ValidationOptions,
 ): Router;
-declare function RouterMethodFn(spec: Spec): Router;
+declare function RouterMethodFn<BodyType>(spec: Spec<BodyType>): Router;
 
 export type RouterMethod = typeof RouterMethodFn;
 

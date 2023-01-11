@@ -1,14 +1,13 @@
 import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethod, RouterMethods, methods } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware, validationMiddleware } from './util/index';
-import koaBody from 'koa-body';
 import { Middleware } from 'koa';
+import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
-import { z } from 'zod';
 
 const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
   const _router = new KoaRouter(routerOpts);
-  _router.use(koaBody());
+  _router.use(bodyParser());
 
   // Delegated methods - preserves value of 'this' in KoaRouter
   function all(...args: any[]) {
@@ -75,7 +74,7 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
    * ```
    */
 
-  function register(spec: RegisterSpec) {
+  function register<BodyType>(spec: RegisterSpec<BodyType>) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
     const name = spec.name ? spec.name : null;
@@ -83,7 +82,11 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
     _router.register(
       spec.path,
       methodsParam,
-      [...prepareMiddleware(spec.pre), validationMiddleware(spec.validate), ...prepareMiddleware(spec.handlers)],
+      [
+        ...prepareMiddleware<BodyType>(spec.pre),
+        validationMiddleware(spec.validate),
+        ...prepareMiddleware<BodyType>(spec.handlers),
+      ],
       { name },
     );
 

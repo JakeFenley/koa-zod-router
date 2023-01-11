@@ -5,35 +5,33 @@ const app = new Koa();
 
 const router = zodRouter({ methods: ['get'] });
 
-router.get(
-  '/',
-  (ctx, next) => {
-    console.log('handler');
-    ctx.body = 'DFASFASAS';
-    next();
-  },
-  {},
-);
-
-// router.register({
-//   method: 'get',
-//   path: '/',
-//   pre: async (ctx, next) => {
-//     console.log('pre');
-//     await next();
+// router.get(
+//   '/',
+//   (ctx, next) => {
+//     ctx.request.body;
+//     console.log('handler');
+//     ctx.body = 'DFASFASAS';
+//     next();
 //   },
-//   handlers: [
-//     async (ctx, next) => {
-//       console.log('handler');
-//       ctx.body = 'hello';
-//       await next();
-//     },
-//     (ctx, next) => {
-//       console.log('post handler');
-//       next();
-//     },
-//   ],
-// });
+//   {},
+// );
+
+router.register<{ hello: 'world' }>({
+  method: 'post',
+  path: '/post',
+  pre: async (ctx, next) => {
+    console.log('pre');
+    await next();
+  },
+  handlers: [
+    async (ctx, next) => {
+      console.log('handler');
+      ctx.request.body.hello = 12314;
+      ctx.body = 'hello';
+      await next();
+    },
+  ],
+});
 
 app.use(router.routes());
 

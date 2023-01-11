@@ -1,5 +1,6 @@
-import { Context, Middleware, Next } from 'koa';
+import { Context, DefaultState, Middleware, Next, ParameterizedContext } from 'koa';
 import { RegisterSpec, Spec, ValidationOptions } from 'src/types';
+import { ParameterizedRequest, ZodContext } from 'src/validator';
 
 function flatten(array: Array<any>): Array<any> {
   return array.reduce((acc, curr) => {
@@ -10,7 +11,9 @@ function flatten(array: Array<any>): Array<any> {
   }, []);
 }
 
-export const prepareMiddleware = (input?: Middleware | Middleware[]): Middleware[] => {
+export const prepareMiddleware = <BodyType>(
+  input?: Middleware<DefaultState, ZodContext<BodyType>> | Middleware<DefaultState, ZodContext<BodyType>>[],
+): Middleware<DefaultState, ZodContext<BodyType>>[] => {
   if (!input) {
     return [];
   }
@@ -90,7 +93,7 @@ export const assertPath = (val: any): val is string | RegExp | Array<string | Re
   return false;
 };
 
-export const assertSpec = (val: any): val is Spec | RegisterSpec => {
+export const assertSpec = <BodyType>(val: any): val is Spec<BodyType> | RegisterSpec<BodyType> => {
   if (typeof val === 'object' && val['path']) {
     return true;
   }

@@ -14,6 +14,6 @@
     "typeRoots": ["src/@types"],
     "strict": true
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "tmp/zod-route-handler.ts"],
   "exclude": ["node_modules", "dist"]
 }
