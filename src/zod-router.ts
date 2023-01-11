@@ -1,7 +1,7 @@
-import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethod, RouterMethods, methods } from './types';
+import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, methods } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware } from './util/index';
-import { Middleware, Request } from 'koa';
+import { Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validator';
