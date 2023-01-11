@@ -3,6 +3,12 @@ import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodType, ZodTypeDef } 
 import { ValidationOptions } from './types';
 import { assertValidation, noopMiddleware } from './util/index';
 
+class ValidationError extends Error {
+  constructor(error: {}) {
+    super('VALIDATION_ERROR', { cause: error });
+  }
+}
+
 const parsedSuccessful = <Input, Output>(
   parsed: SafeParseReturnType<Input, Output>,
 ): parsed is SafeParseSuccess<Output> => {
@@ -22,12 +28,6 @@ const validate = async <T>(
   }
   return undefined;
 };
-
-class ValidationError extends Error {
-  constructor(error: {}) {
-    super('VALIDATION_ERROR', { cause: error });
-  }
-}
 
 export const validationMiddleware = <Headers, Params, Query, Body, Response>(
   validation?: ValidationOptions<Headers, Params, Query, Body, Response>,

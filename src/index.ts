@@ -24,15 +24,17 @@ router.register({
   },
   handlers: [
     async (ctx, next) => {
+      ctx.request.headers['x-test-header'] = 'ásfas';
       const { foo } = ctx.request.body;
-      ctx.body = 'hello';
+      ctx.response.body = { success: true };
       await next();
     },
   ],
   validate: {
     body: z.object({ foo: z.number() }),
     query: z.object({ bar: z.string() }),
-    headers: z.object({ 'x-test-header': z.string() }),
+    headers: z.object({ 'x-test-headerrrr': z.string() }),
+    response: z.object({ success: z.boolean() }),
   },
 });
 

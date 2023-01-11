@@ -111,13 +111,9 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
    * ```
    */
 
-  function register<
-    Headers = Record<string, any>,
-    Params = Record<string, any>,
-    Query = Record<string, any>,
-    Body = Record<string, any>,
-    Response = Record<string, any>,
-  >(spec: RegisterSpec<Headers, Params, Query, Body, Response>) {
+  function register<Headers = unknown, Params = unknown, Query = unknown, Body = unknown, Response = unknown>(
+    spec: RegisterSpec<Headers, Params, Query, Body, Response>,
+  ) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
     const name = spec.name ? spec.name : null;
