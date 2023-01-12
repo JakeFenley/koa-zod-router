@@ -42,8 +42,11 @@ const methods: Method[] = [
   'unsubscribe',
 ];
 
-const zodRouter = ({ zodRouterOpts: opts, ...koaRouterOpts }: RouterOpts) => {
-  const _router = new KoaRouter(koaRouterOpts);
+const zodRouter = (routerOpts?: RouterOpts) => {
+  const opts = { ...routerOpts?.zodRouterOpts };
+  delete routerOpts?.zodRouterOpts;
+
+  const _router = new KoaRouter(routerOpts);
   _router.use(bodyParser());
 
   // Delegated methods - preserves value of 'this' in KoaRouter

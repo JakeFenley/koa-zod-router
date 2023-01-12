@@ -80,7 +80,7 @@ export type RegisterSpec<Headers, Params, Query, Body, Response> = {
 
 declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
   path: string,
-  handlers: Middleware | Middleware[],
+  handlers: ZodMiddleware<Headers, Params, Query, Body, Response>,
   validationOptions?: ValidationOptions<Headers, Params, Query, Body, Response>,
 ): KoaRouter;
 declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
@@ -97,6 +97,6 @@ export type ZodRouter = ReturnType<typeof zodRouter>;
 
 export interface RouterOpts extends RouterOptions {
   zodRouterOpts?: {
-    exposeClientErrors: boolean;
+    exposeClientErrors?: boolean;
   };
 }

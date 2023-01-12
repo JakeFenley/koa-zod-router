@@ -4,16 +4,21 @@ import zodRouter from '../src/zod-router';
 
 const app = new Koa();
 
-const router = zodRouter({ methods: ['get'] });
+const router = zodRouter();
 
-router.register({
-  method: 'get',
-  path: '/',
-  handlers: (ctx, next) => {
-    ctx.body = 'FSDAFASDF';
-    next();
+router.post(
+  '/hello/:id',
+  async (ctx, next) => {
+    const { foo } = ctx.request.body;
+    const { id } = ctx.request.params;
+    ctx.body = id;
+    await next();
   },
-});
+  {
+    body: z.object({ foo: z.number() }),
+    params: z.object({ id: z.number() }),
+  },
+);
 
 router.register({
   method: 'post',
@@ -38,6 +43,8 @@ router.register({
 });
 
 app.use(router.routes());
+
+console.log(router.routes());
 
 app.listen(3000, () => {
   console.log('app listening on http://localhost:3000');
