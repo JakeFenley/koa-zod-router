@@ -1,5 +1,5 @@
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { RegisterSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from 'src/types';
+import { RegisterSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 
 function flatten(array: Array<any>): Array<any> {
   return array.reduce((acc, curr) => {
@@ -12,7 +12,7 @@ function flatten(array: Array<any>): Array<any> {
 
 export const prepareMiddleware = <Headers, Params, Query, Body, Response>(
   input?: ZodMiddleware<Headers, Params, Query, Body, Response>,
-): Middleware<DefaultState, ZodContext<Headers, Params, Query, Body, Response>>[] => {
+): Middleware<DefaultState, ZodContext<Headers, Params, Query, Body>, Response>[] => {
   if (!input) {
     return [];
   }

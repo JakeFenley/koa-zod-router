@@ -1,7 +1,7 @@
 import { DefaultContext, Next } from 'koa';
 import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodType, ZodTypeDef } from 'zod';
 import { ValidationOptions } from './types';
-import { assertValidation, noopMiddleware } from './util/index';
+import { assertValidation, noopMiddleware } from './util';
 
 class ValidationError extends Error {
   constructor(error: {}) {

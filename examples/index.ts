@@ -1,6 +1,6 @@
 import Koa from 'koa';
 import { z } from 'zod';
-import zodRouter from './zod-router';
+import zodRouter from '../src/zod-router';
 
 const app = new Koa();
 
@@ -19,12 +19,11 @@ router.register({
   method: 'post',
   path: '/post',
   pre: async (ctx, next) => {
-    //... pre-handlers
+    //... pre-handler
     await next();
   },
   handlers: [
     async (ctx, next) => {
-      ctx.request.headers['x-test-header'] = 'ásfas';
       const { foo } = ctx.request.body;
       ctx.response.body = { success: true };
       await next();
@@ -33,7 +32,7 @@ router.register({
   validate: {
     body: z.object({ foo: z.number() }),
     query: z.object({ bar: z.string() }),
-    headers: z.object({ 'x-test-headerrrr': z.string() }),
+    headers: z.object({ 'x-test-header': z.string() }),
     response: z.object({ success: z.boolean() }),
   },
 });

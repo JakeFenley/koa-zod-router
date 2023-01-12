@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "ts-node-dev src/index.ts"
+    "start": "ts-node-dev examples/index.ts"
   },
   "keywords": [],
   "author": "Jake Fenley",
