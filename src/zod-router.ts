@@ -1,4 +1,4 @@
-import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, ZodMiddleware } from './types';
+import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, ZodMiddleware, RouterOpts } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
@@ -42,8 +42,8 @@ const methods: Method[] = [
   'unsubscribe',
 ];
 
-const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
-  const _router = new KoaRouter(routerOpts);
+const zodRouter = ({ zodRouterOpts: opts, ...koaRouterOpts }: RouterOpts) => {
+  const _router = new KoaRouter(koaRouterOpts);
   _router.use(bodyParser());
 
   // Delegated methods - preserves value of 'this' in KoaRouter
@@ -124,7 +124,7 @@ const zodRouter = (routerOpts?: KoaRouter.RouterOptions) => {
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
       [
         ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.pre),
-        validationMiddleware(spec.validate),
+        validationMiddleware(spec.validate, opts),
         ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.handlers),
       ],
       { name },

@@ -1,4 +1,4 @@
-import Router, { LayerOptions } from '@koa/router';
+import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
 import { DefaultState, Middleware } from 'koa';
 import z, { ZodSchema } from 'zod';
 import zodRouter from './zod-router';
@@ -58,7 +58,7 @@ export type ValidationOptions<Headers, Params, Query, Body, Response> = {
   params?: ZodSchema<Params>;
   query?: ZodSchema<Query>;
   body?: ZodSchema<Body>;
-  response?: ZodSchema<Response>;
+  response?: ZodSchema<Response> | { [key: string | number]: ZodSchema<Response> };
 };
 
 export type ZodMiddleware<Headers, Params, Query, Body, Response> =
@@ -82,10 +82,10 @@ declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
   path: string,
   handlers: Middleware | Middleware[],
   validationOptions?: ValidationOptions<Headers, Params, Query, Body, Response>,
-): Router;
+): KoaRouter;
 declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
   spec: Spec<Headers, Params, Query, Body, Response>,
-): Router;
+): KoaRouter;
 
 export type RouterMethod = typeof RouterMethodFn;
 
@@ -94,3 +94,9 @@ export type RouterMethods = {
 };
 
 export type ZodRouter = ReturnType<typeof zodRouter>;
+
+export interface RouterOpts extends RouterOptions {
+  zodRouterOpts?: {
+    exposeClientErrors: boolean;
+  };
+}

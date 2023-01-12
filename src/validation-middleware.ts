@@ -1,6 +1,6 @@
 import { DefaultContext, Next } from 'koa';
 import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodType, ZodTypeDef } from 'zod';
-import { ValidationOptions } from './types';
+import { ValidationOptions, RouterOpts } from './types';
 import { assertValidation, noopMiddleware } from './util';
 
 class ValidationError extends Error {
@@ -15,7 +15,7 @@ const parsedSuccessful = <Input, Output>(
   return parsed.success;
 };
 
-const validate = async <T>(
+const validateInput = async <T>(
   schema: ZodType<T, ZodTypeDef, T> | undefined,
   data: unknown,
 ): Promise<ZodError<T> | undefined> => {
@@ -29,30 +29,49 @@ const validate = async <T>(
   return undefined;
 };
 
+const validateOutput = async <T>(
+  schema: ZodType<T, ZodTypeDef, T> | { [key: string | number]: ZodType<T, ZodTypeDef, T> } | undefined,
+  data: unknown,
+): Promise<ZodError<T> | undefined> => {
+  if (!schema) {
+    return undefined;
+  }
+  // const parsed = await schema.safeParseAsync(data);
+  // if (!parsedSuccessful(parsed)) {
+  //   return parsed.error;
+  // }
+  return undefined;
+};
+
 export const validationMiddleware = <Headers, Params, Query, Body, Response>(
   validation?: ValidationOptions<Headers, Params, Query, Body, Response>,
+  opts?: RouterOpts['zodRouterOpts'],
 ) => {
   if (!assertValidation(validation)) {
     return noopMiddleware;
   }
 
   return async (ctx: DefaultContext, next: Next) => {
-    let errors = await Promise.all([
-      validate(validation.headers, ctx.request.headers),
-      validate(validation.params, ctx.request.params),
-      validate(validation.query, ctx.request.query),
-      validate(validation.body, ctx.request.body),
-    ]).then((errors) => errors.filter((err) => err));
-    // TODO: Add config option for exposing client errors##
-    if (errors.length) {
+    const inputErrors = await Promise.all([
+      validateInput(validation.headers, ctx.request.headers),
+      validateInput(validation.params, ctx.request.params),
+      validateInput(validation.query, ctx.request.query),
+      validateInput(validation.body, ctx.request.body),
+    ]).then((inputErrors) => inputErrors.filter((err) => err));
+
+    if (opts?.exposeClientErrors && inputErrors.length) {
       ctx.status = 400;
       ctx.type = 'json';
-      ctx.body = { errors };
-      ctx.app.emit('error', new ValidationError({ errors }), ctx);
+      ctx.body = { inputErrors };
+      ctx.app.emit('error', new ValidationError({ inputErrors }), ctx);
     } else {
       await next();
     }
 
-    // implement output validations here
+    const outputErrors = await validateOutput(validation.response, ctx.body);
+
+    if (outputErrors) {
+      ctx.throw(500);
+    }
   };
 };
