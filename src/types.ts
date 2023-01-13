@@ -97,6 +97,7 @@ export type ZodRouter = ReturnType<typeof zodRouter>;
 
 export interface RouterOpts extends RouterOptions {
   zodRouterOpts?: {
-    exposeClientErrors?: boolean;
+    exposeRequestErrors?: boolean;
+    exposeResponseErrors?: boolean;
   };
 }

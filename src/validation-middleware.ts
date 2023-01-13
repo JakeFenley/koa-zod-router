@@ -1,5 +1,5 @@
 import { DefaultContext, Next } from 'koa';
-import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodType, ZodTypeDef } from 'zod';
+import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodObject, ZodType, ZodTypeDef } from 'zod';
 import { ValidationOptions, RouterOpts } from './types';
 import { assertValidation, noopMiddleware } from './util';
 
@@ -16,8 +16,8 @@ const parsedSuccessful = <Input, Output>(
 };
 
 const validateInput = async <T>(
-  schema: ZodType<T, ZodTypeDef, T> | undefined,
   data: unknown,
+  schema?: ZodType<T, ZodTypeDef, T>,
 ): Promise<ZodError<T> | undefined> => {
   if (!schema) {
     return undefined;
@@ -30,16 +30,20 @@ const validateInput = async <T>(
 };
 
 const validateOutput = async <T>(
-  schema: ZodType<T, ZodTypeDef, T> | { [key: string | number]: ZodType<T, ZodTypeDef, T> } | undefined,
-  data: unknown,
-): Promise<ZodError<T> | undefined> => {
+  ctx: DefaultContext,
+  schema?: ZodType<T, ZodTypeDef, T> | { [key: string | number]: ZodType<T, ZodTypeDef, T> },
+): Promise<ZodError<T>[] | undefined> => {
   if (!schema) {
     return undefined;
   }
-  // const parsed = await schema.safeParseAsync(data);
-  // if (!parsedSuccessful(parsed)) {
-  //   return parsed.error;
-  // }
+
+  if (schema instanceof ZodObject) {
+    const parsed = await schema.safeParseAsync(ctx.body);
+    if (!parsedSuccessful(parsed)) {
+      return [parsed.error];
+    }
+  }
+
   return undefined;
 };
 
@@ -53,24 +57,37 @@ export const validationMiddleware = <Headers, Params, Query, Body, Response>(
 
   return async (ctx: DefaultContext, next: Next) => {
     const inputErrors = await Promise.all([
-      validateInput(validation.headers, ctx.request.headers),
-      validateInput(validation.params, ctx.request.params),
-      validateInput(validation.query, ctx.request.query),
-      validateInput(validation.body, ctx.request.body),
+      validateInput(ctx.request.headers, validation.headers),
+      validateInput(ctx.request.params, validation.params),
+      validateInput(ctx.request.query, validation.query),
+      validateInput(ctx.request.body, validation.body),
     ]).then((inputErrors) => inputErrors.filter((err) => err));
 
-    if (opts?.exposeClientErrors && inputErrors.length) {
+    if (inputErrors.length && opts?.exposeRequestErrors) {
       ctx.status = 400;
       ctx.type = 'json';
       ctx.body = { inputErrors };
       ctx.app.emit('error', new ValidationError({ inputErrors }), ctx);
-    } else {
-      await next();
+      return;
     }
 
-    const outputErrors = await validateOutput(validation.response, ctx.body);
+    if (inputErrors.length) {
+      ctx.throw(400, 'VALIDATION_ERROR');
+    }
 
-    if (outputErrors) {
+    await next();
+
+    const outputErrors = await validateOutput(ctx, validation.response);
+
+    if (outputErrors?.length && opts?.exposeRequestErrors) {
+      ctx.status = 500;
+      ctx.type = 'json';
+      ctx.body = { outputErrors };
+      ctx.app.emit('error', new ValidationError({ outputErrors }), ctx);
+      return;
+    }
+
+    if (outputErrors?.length) {
       ctx.throw(500);
     }
   };

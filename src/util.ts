@@ -87,7 +87,7 @@ export const assertSpec = <Headers, Params, Query, Body, Response>(
 export const assertValidation = <Headers, Params, Query, Body, Response>(
   val: any,
 ): val is ValidationOptions<Headers, Params, Query, Body, Response> => {
-  const props = ['body', 'query', 'params', 'response'];
+  const props = ['headers', 'body', 'query', 'params', 'response'];
 
   if (typeof val === 'object') {
     for (const prop of props) {

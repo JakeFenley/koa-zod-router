@@ -4,7 +4,7 @@ import zodRouter from '../src/zod-router';
 
 const app = new Koa();
 
-const router = zodRouter();
+const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: true, exposeResponseErrors: true } });
 
 router.post(
   '/hello/:id',
@@ -16,7 +16,7 @@ router.post(
   },
   {
     body: z.object({ foo: z.number() }),
-    params: z.object({ id: z.number() }),
+    params: z.object({ id: z.string() }),
   },
 );
 
@@ -43,8 +43,6 @@ router.register({
 });
 
 app.use(router.routes());
-
-console.log(router.routes());
 
 app.listen(3000, () => {
   console.log('app listening on http://localhost:3000');
