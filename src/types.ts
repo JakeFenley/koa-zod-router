@@ -102,6 +102,5 @@ export interface RouterOpts {
   zodRouterOpts?: {
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;
-    strictResponseValidation?: boolean;
   };
 }
