@@ -8,7 +8,7 @@
     "build": "tsc",
     "example": "ts-node-dev examples/index.ts",
     "test": "mocha",
-    "lint": "eslint \"src/**/*.ts\" --cache"
+    "lint": "eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\""
   },
   "keywords": [],
   "author": {
