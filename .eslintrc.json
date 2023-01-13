@@ -1,0 +1,14 @@
+{
+  "env": {
+    "es6": true,
+    "node": true
+  },
+  "extends": ["prettier", "plugin:prettier/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "project": "./tsconfig.json"
+  },
+  "plugins": ["@typescript-eslint", "prettier", "import"]
+}

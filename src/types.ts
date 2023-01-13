@@ -47,20 +47,20 @@ type RequireKeys<T> = {
 
 export type InferedSchema<T> = z.infer<ZodSchema<T>>;
 
-export interface ZodContext<H, P, Q, B> {
+export interface ZodContext<Headers, Params, Query, Body> {
   request: {
-    body: B;
-    headers: H;
-    params: P;
-    query: Q;
+    body: Body;
+    headers: Headers;
+    params: Params;
+    query: Query;
   };
 }
-export type ValidationOptions<H, P, Q, B, R> = {
-  headers?: ZodSchema<H>;
-  params?: ZodSchema<P>;
-  query?: ZodSchema<Q>;
-  body?: ZodSchema<B>;
-  response?: ZodSchema<R>;
+export type ValidationOptions<Headers, Params, Query, Body, Response> = {
+  headers?: ZodSchema<Headers>;
+  params?: ZodSchema<Params>;
+  query?: ZodSchema<Query>;
+  body?: ZodSchema<Body>;
+  response?: ZodSchema<Response>;
 };
 
 export type ZodMiddleware<H, P, Q, B, R> =

@@ -1,8 +1,7 @@
 import { DefaultContext, Next } from 'koa';
-import { any, SafeParseReturnType, SafeParseSuccess, ZodError, ZodObject, ZodType, ZodTypeAny, ZodTypeDef } from 'zod';
+import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodType, ZodTypeAny, ZodTypeDef } from 'zod';
 import { ValidationOptions, RouterOpts } from './types';
 import { assertValidation, noopMiddleware } from './util';
-import z from 'zod';
 class ValidationError extends Error {
   constructor(error: {}) {
     super('VALIDATION_ERROR', { cause: error });
@@ -55,6 +54,7 @@ export const validationMiddleware = <H, P, Q, B, R>(
   }
 
   return async (ctx: DefaultContext, next: Next) => {
+    // Input validation
     const inputErrors = await Promise.all([
       validateInput(ctx.request.headers, validation.headers),
       validateInput(ctx.request.params, validation.params),
@@ -76,6 +76,7 @@ export const validationMiddleware = <H, P, Q, B, R>(
 
     await next();
 
+    // Output validation
     const output = await validateOutput(ctx.body, validation.response, opts);
 
     if (!output) {
