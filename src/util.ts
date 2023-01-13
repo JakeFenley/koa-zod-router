@@ -1,27 +1,27 @@
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { RegisterSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 
-function flatten(array: Array<any>): Array<any> {
-  return array.reduce((acc, curr) => {
+function flatten<H, P, Q, B, R>(
+  middlewares: Array<ZodMiddleware<H, P, Q, B, R> | undefined>,
+): Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[] {
+  const flattened = middlewares.reduce((acc: Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[], curr) => {
+    if (!curr) {
+      return acc;
+    }
+
     if (Array.isArray(curr)) {
       return acc.concat(flatten(curr));
     }
     return acc.concat(curr);
   }, []);
+
+  return flattened;
 }
 
-export const prepareMiddleware = <Headers, Params, Query, Body, Response>(
-  input?: ZodMiddleware<Headers, Params, Query, Body, Response>,
-): Middleware<DefaultState, ZodContext<Headers, Params, Query, Body>, Response>[] => {
-  if (!input) {
-    return [];
-  }
-
-  if (!Array.isArray(input)) {
-    return [input];
-  } else {
-    return flatten(input);
-  }
+export const prepareMiddleware = <H, P, Q, B, R>(
+  input: Array<ZodMiddleware<H, P, Q, B, R> | undefined>,
+): Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[] => {
+  return flatten(input);
 };
 
 export async function noopMiddleware(ctx: Context, next: Next) {
@@ -74,9 +74,7 @@ export const assertPath = (val: any): val is string | RegExp | Array<string | Re
   return false;
 };
 
-export const assertSpec = <Headers, Params, Query, Body, Response>(
-  val: any,
-): val is Spec<Headers, Params, Query, Body, Response> | RegisterSpec<Headers, Params, Query, Body, Response> => {
+export const assertSpec = <H, P, Q, B, R>(val: any): val is Spec<H, P, Q, B, R> | RegisterSpec<H, P, Q, B, R> => {
   if (typeof val === 'object' && val['path']) {
     return true;
   }
@@ -84,9 +82,7 @@ export const assertSpec = <Headers, Params, Query, Body, Response>(
   return false;
 };
 
-export const assertValidation = <Headers, Params, Query, Body, Response>(
-  val: any,
-): val is ValidationOptions<Headers, Params, Query, Body, Response> => {
+export const assertValidation = <H, P, Q, B, R>(val: any): val is ValidationOptions<H, P, Q, B, R> => {
   const props = ['headers', 'body', 'query', 'params', 'response'];
 
   if (typeof val === 'object') {

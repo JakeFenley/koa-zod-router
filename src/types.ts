@@ -47,47 +47,45 @@ type RequireKeys<T> = {
 
 export type InferedSchema<T> = z.infer<ZodSchema<T>>;
 
-export interface ZodContext<Headers, Params, Query, Body> {
+export interface ZodContext<H, P, Q, B> {
   request: {
-    body: Body;
-    headers: Headers;
-    params: Params;
-    query: Query;
+    body: B;
+    headers: H;
+    params: P;
+    query: Q;
   };
 }
-export type ValidationOptions<Headers, Params, Query, Body, Response> = {
-  headers?: ZodSchema<Headers>;
-  params?: ZodSchema<Params>;
-  query?: ZodSchema<Query>;
-  body?: ZodSchema<Body>;
-  response?: ZodSchema<Response>;
+export type ValidationOptions<H, P, Q, B, R> = {
+  headers?: ZodSchema<H>;
+  params?: ZodSchema<P>;
+  query?: ZodSchema<Q>;
+  body?: ZodSchema<B>;
+  response?: ZodSchema<R>;
 };
 
-export type ZodMiddleware<Headers, Params, Query, Body, Response> =
-  | Middleware<DefaultState, ZodContext<Headers, Params, Query, Body>, Response>
-  | Middleware<DefaultState, ZodContext<Headers, Params, Query, Body>, Response>[];
+export type ZodMiddleware<H, P, Q, B, R> =
+  | Middleware<DefaultState, ZodContext<H, P, Q, B>, R>
+  | Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[];
 
-export type Spec<Headers, Params, Query, Body, Response> = {
+export type Spec<H, P, Q, B, R> = {
   name?: string;
   path: string;
-  handlers: ZodMiddleware<Headers, Params, Query, Body, Response>;
-  pre?: ZodMiddleware<Headers, Params, Query, Body, Response>;
-  validate?: ValidationOptions<Headers, Params, Query, Body, Response>;
+  handlers: ZodMiddleware<H, P, Q, B, R>;
+  pre?: ZodMiddleware<H, P, Q, B, R>;
+  validate?: ValidationOptions<H, P, Q, B, R>;
 };
 
-export type RegisterSpec<Headers, Params, Query, Body, Response> = {
+export type RegisterSpec<H, P, Q, B, R> = {
   method: Method;
   opts?: LayerOptions;
-} & Spec<Headers, Params, Query, Body, Response>;
+} & Spec<H, P, Q, B, R>;
 
-declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
+declare function RouterMethodFn<H, P, Q, B, R>(
   path: string,
-  handlers: ZodMiddleware<Headers, Params, Query, Body, Response>,
-  validationOptions?: ValidationOptions<Headers, Params, Query, Body, Response>,
+  handlers: ZodMiddleware<H, P, Q, B, R>,
+  validationOptions?: ValidationOptions<H, P, Q, B, R>,
 ): KoaRouter;
-declare function RouterMethodFn<Headers, Params, Query, Body, Response>(
-  spec: Spec<Headers, Params, Query, Body, Response>,
-): KoaRouter;
+declare function RouterMethodFn<H, P, Q, B, R>(spec: Spec<H, P, Q, B, R>): KoaRouter;
 
 export type RouterMethod = typeof RouterMethodFn;
 
@@ -104,5 +102,6 @@ export interface RouterOpts {
   zodRouterOpts?: {
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;
+    strictResponseValidation?: boolean;
   };
 }

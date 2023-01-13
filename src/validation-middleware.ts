@@ -1,8 +1,8 @@
 import { DefaultContext, Next } from 'koa';
-import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodObject, ZodType, ZodTypeDef } from 'zod';
+import { any, SafeParseReturnType, SafeParseSuccess, ZodError, ZodObject, ZodType, ZodTypeAny, ZodTypeDef } from 'zod';
 import { ValidationOptions, RouterOpts } from './types';
 import { assertValidation, noopMiddleware } from './util';
-
+import z from 'zod';
 class ValidationError extends Error {
   constructor(error: {}) {
     super('VALIDATION_ERROR', { cause: error });
@@ -15,7 +15,10 @@ const parsedSuccessful = <Input, Output>(
   return parsed.success;
 };
 
-const validate = async <T>(data: unknown, schema?: ZodType<T, ZodTypeDef, T>): Promise<ZodError<T> | undefined> => {
+const validateInput = async <T>(
+  data: unknown,
+  schema?: ZodType<T, ZodTypeDef, T>,
+): Promise<ZodError<T> | undefined> => {
   if (!schema) {
     return undefined;
   }
@@ -23,11 +26,28 @@ const validate = async <T>(data: unknown, schema?: ZodType<T, ZodTypeDef, T>): P
   if (!parsedSuccessful(parsed)) {
     return parsed.error;
   }
+
   return undefined;
 };
 
-export const validationMiddleware = <Headers, Params, Query, Body, Response>(
-  validation?: ValidationOptions<Headers, Params, Query, Body, Response>,
+const validateOutput = async <T>(
+  data: unknown,
+  schema?: ZodTypeAny,
+  opts?: RouterOpts['zodRouterOpts'],
+): Promise<ZodError<T> | SafeParseSuccess<ZodTypeAny> | undefined> => {
+  if (!schema) {
+    return undefined;
+  }
+
+  const parsed = await schema.safeParseAsync(data);
+  if (!parsedSuccessful(parsed)) {
+    return parsed.error;
+  }
+  return parsed;
+};
+
+export const validationMiddleware = <H, P, Q, B, R>(
+  validation?: ValidationOptions<H, P, Q, B, R>,
   opts?: RouterOpts['zodRouterOpts'],
 ) => {
   if (!assertValidation(validation)) {
@@ -36,10 +56,10 @@ export const validationMiddleware = <Headers, Params, Query, Body, Response>(
 
   return async (ctx: DefaultContext, next: Next) => {
     const inputErrors = await Promise.all([
-      validate(ctx.request.headers, validation.headers),
-      validate(ctx.request.params, validation.params),
-      validate(ctx.request.query, validation.query),
-      validate(ctx.request.body, validation.body),
+      validateInput(ctx.request.headers, validation.headers),
+      validateInput(ctx.request.params, validation.params),
+      validateInput(ctx.request.query, validation.query),
+      validateInput(ctx.request.body, validation.body),
     ]).then((inputErrors) => inputErrors.filter((err) => err));
 
     if (inputErrors.length && opts?.exposeRequestErrors) {
@@ -56,18 +76,25 @@ export const validationMiddleware = <Headers, Params, Query, Body, Response>(
 
     await next();
 
-    const outputError = await validate(ctx.body, validation.response);
+    const output = await validateOutput(ctx.body, validation.response, opts);
 
-    if (outputError && opts?.exposeRequestErrors) {
-      ctx.status = 500;
-      ctx.type = 'json';
-      ctx.body = { outputError };
-      ctx.app.emit('error', new ValidationError({ outputError }), ctx);
+    if (!output) {
       return;
     }
 
-    if (outputError) {
+    if (output instanceof ZodError) {
+      if (opts?.exposeResponseErrors) {
+        ctx.status = 500;
+        ctx.type = 'json';
+        ctx.body = { output };
+        ctx.app.emit('error', new ValidationError({ output }), ctx);
+        return;
+      }
+
       ctx.throw(500);
+    } else {
+      ctx.body = output.data;
+      ctx.response.body = output.data;
     }
   };
 };

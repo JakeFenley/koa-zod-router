@@ -4,7 +4,7 @@ import { prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
-import { multipartParserMiddleware } from './multi-parser-middleware';
+import { multipartParserMiddleware } from './multipart-parser-middleware';
 
 const methods: Method[] = [
   'acl',
@@ -113,8 +113,8 @@ const zodRouter = (opts?: RouterOpts) => {
    * ```
    */
 
-  function register<Headers = unknown, Params = unknown, Query = unknown, Body = unknown, Response = unknown>(
-    spec: RegisterSpec<Headers, Params, Query, Body, Response>,
+  function register<H = unknown, P = unknown, Q = unknown, B = unknown, R = unknown>(
+    spec: RegisterSpec<H, P, Q, B, R>,
   ) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
@@ -124,11 +124,7 @@ const zodRouter = (opts?: RouterOpts) => {
       spec.path,
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
-      [
-        ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.pre),
-        validationMiddleware(spec.validate, opts?.zodRouterOpts),
-        ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.handlers),
-      ],
+      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouterOpts), spec.handlers]),
       { name },
     );
 
@@ -137,10 +133,10 @@ const zodRouter = (opts?: RouterOpts) => {
 
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
-      acc[method] = <Headers, Params, Query, Body, Response>(
-        pathOrSpec: string | Spec<Headers, Params, Query, Body, Response>,
-        handlers?: ZodMiddleware<Headers, Params, Query, Body, Response>,
-        validationOptions?: ValidationOptions<Headers, Params, Query, Body, Response>,
+      acc[method] = <H, P, Q, B, R>(
+        pathOrSpec: string | Spec<H, P, Q, B, R>,
+        handlers?: ZodMiddleware<H, P, Q, B, R>,
+        validationOptions?: ValidationOptions<H, P, Q, B, R>,
       ) => {
         if (typeof pathOrSpec === 'string' && handlers) {
           register({

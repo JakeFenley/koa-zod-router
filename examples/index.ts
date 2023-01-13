@@ -4,19 +4,26 @@ import zodRouter from '../src/zod-router';
 
 const app = new Koa();
 
-const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: true, exposeResponseErrors: true } });
+const router = zodRouter({
+  zodRouterOpts: { exposeRequestErrors: true, exposeResponseErrors: true, strictResponseValidation: true },
+});
 
 router.post(
   '/hello/:id',
   async (ctx, next) => {
     const { foo } = ctx.request.body;
+    const { bar } = ctx.request.query;
     const { id } = ctx.request.params;
-    ctx.body = id;
+    ctx.request.headers['x-test-header'];
+    ctx.body = { success: true };
     await next();
   },
   {
     body: z.object({ foo: z.number() }),
+    query: z.object({ bar: z.string() }),
     params: z.object({ id: z.string() }),
+    headers: z.object({ 'x-test-header': z.string() }),
+    response: z.object({ success: z.boolean() }),
   },
 );
 
@@ -30,7 +37,9 @@ router.register({
   handlers: [
     async (ctx, next) => {
       const { foo } = ctx.request.body;
-      ctx.body = { success: true, second: 'fdsafasd' };
+      const { bar } = ctx.request.query;
+      ctx.request.headers['x-test-header'];
+      ctx.body = { hello: 'world' };
       await next();
     },
   ],
@@ -38,7 +47,7 @@ router.register({
     body: z.object({ foo: z.number() }),
     query: z.object({ bar: z.string() }),
     headers: z.object({ 'x-test-header': z.string() }),
-    response: z.object({ success: z.boolean() }).or(z.object({ second: z.string() })),
+    response: z.object({ success: z.boolean() }).or(z.object({ hello: z.string() })),
   },
 });
 

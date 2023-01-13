@@ -6,7 +6,7 @@
     "rootDir": "src",
     "target": "ES2022",
     "module": "CommonJS",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Node",
     "noImplicitAny": true,
     "esModuleInterop": true,
     "sourceMap": true,
@@ -21,6 +21,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true
   },
-  "include": ["src", "test"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
 }

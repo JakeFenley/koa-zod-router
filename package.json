@@ -5,10 +5,15 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "ts-node-dev examples/index.ts"
+    "build": "tsc",
+    "example": "ts-node-dev examples/index.ts",
+    "test": "mocha"
   },
   "keywords": [],
-  "author": "Jake Fenley",
+  "author": {
+    "name": "Jake Fenley",
+    "url": "https://github.com/jakefenley"
+  },
   "license": "MIT",
   "dependencies": {
     "@koa/router": "^12.0.0",
@@ -23,6 +28,10 @@
     "@types/koa__router": "^12.0.0",
     "@types/node": "^18.11.18",
     "koa": "^2.14.1",
+    "mocha": "^10.2.0",
+    "sinon": "^15.0.1",
+    "supertest": "^6.3.3",
+    "ts-node": "^10.9.1",
     "ts-node-dev": "^2.0.0",
     "typescript": "^4.9.4"
   },
