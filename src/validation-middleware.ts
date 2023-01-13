@@ -87,8 +87,7 @@ export const validationMiddleware = <H, P, Q, B, R>(
       if (opts?.exposeResponseErrors) {
         ctx.status = 500;
         ctx.type = 'json';
-        ctx.body = { output };
-        ctx.app.emit('error', new ValidationError({ output }), ctx);
+        ctx.body = { output }; ctx.app.emit('error', new ValidationError({ output }), ctx);
         return;
       }
 
