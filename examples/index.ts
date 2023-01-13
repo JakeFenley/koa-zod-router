@@ -30,7 +30,7 @@ router.register({
   handlers: [
     async (ctx, next) => {
       const { foo } = ctx.request.body;
-      ctx.response.body = { success: true };
+      ctx.body = { success: true, second: 'fdsafasd' };
       await next();
     },
   ],
@@ -38,7 +38,7 @@ router.register({
     body: z.object({ foo: z.number() }),
     query: z.object({ bar: z.string() }),
     headers: z.object({ 'x-test-header': z.string() }),
-    response: z.object({ success: z.boolean() }),
+    response: z.object({ success: z.boolean() }).or(z.object({ second: z.string() })),
   },
 });
 

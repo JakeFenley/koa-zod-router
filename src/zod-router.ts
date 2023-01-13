@@ -4,6 +4,7 @@ import { prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
+import { multipartParserMiddleware } from './multi-parser-middleware';
 
 const methods: Method[] = [
   'acl',
@@ -42,12 +43,10 @@ const methods: Method[] = [
   'unsubscribe',
 ];
 
-const zodRouter = (routerOpts?: RouterOpts) => {
-  const opts = { ...routerOpts?.zodRouterOpts };
-  delete routerOpts?.zodRouterOpts;
-
-  const _router = new KoaRouter(routerOpts);
-  _router.use(bodyParser());
+const zodRouter = (opts?: RouterOpts) => {
+  const _router = new KoaRouter(opts?.koaRouterOpts);
+  _router.use(bodyParser(opts?.bodyParserOpts));
+  _router.use(multipartParserMiddleware(opts?.formidableOpts));
 
   // Delegated methods - preserves value of 'this' in KoaRouter
   function all(...args: any[]) {
@@ -127,7 +126,7 @@ const zodRouter = (routerOpts?: RouterOpts) => {
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
       [
         ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.pre),
-        validationMiddleware(spec.validate, opts),
+        validationMiddleware(spec.validate, opts?.zodRouterOpts),
         ...prepareMiddleware<Headers, Params, Query, Body, Response>(spec.handlers),
       ],
       { name },

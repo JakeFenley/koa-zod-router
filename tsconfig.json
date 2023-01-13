@@ -5,7 +5,7 @@
     "declaration": true,
     "rootDir": "src",
     "target": "ES2022",
-    "module": "NodeNext",
+    "module": "CommonJS",
     "moduleResolution": "NodeNext",
     "noImplicitAny": true,
     "esModuleInterop": true,
@@ -13,8 +13,14 @@
     "outDir": "./dist",
     "typeRoots": ["src/@types"],
     "strict": true,
-    "rootDirs": ["src"]
+    "rootDirs": ["src"],
+    "alwaysStrict": true,
+    "isolatedModules": true,
+    "strictNullChecks": true,
+    "noImplicitOverride": true,
+    "noImplicitReturns": true,
+    "noImplicitThis": true
   },
-  "include": ["src", "test", "tmp/zod-route-handler.ts"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "dist"]
 }

@@ -15,10 +15,7 @@ const parsedSuccessful = <Input, Output>(
   return parsed.success;
 };
 
-const validateInput = async <T>(
-  data: unknown,
-  schema?: ZodType<T, ZodTypeDef, T>,
-): Promise<ZodError<T> | undefined> => {
+const validate = async <T>(data: unknown, schema?: ZodType<T, ZodTypeDef, T>): Promise<ZodError<T> | undefined> => {
   if (!schema) {
     return undefined;
   }
@@ -26,24 +23,6 @@ const validateInput = async <T>(
   if (!parsedSuccessful(parsed)) {
     return parsed.error;
   }
-  return undefined;
-};
-
-const validateOutput = async <T>(
-  ctx: DefaultContext,
-  schema?: ZodType<T, ZodTypeDef, T> | { [key: string | number]: ZodType<T, ZodTypeDef, T> },
-): Promise<ZodError<T>[] | undefined> => {
-  if (!schema) {
-    return undefined;
-  }
-
-  if (schema instanceof ZodObject) {
-    const parsed = await schema.safeParseAsync(ctx.body);
-    if (!parsedSuccessful(parsed)) {
-      return [parsed.error];
-    }
-  }
-
   return undefined;
 };
 
@@ -57,10 +36,10 @@ export const validationMiddleware = <Headers, Params, Query, Body, Response>(
 
   return async (ctx: DefaultContext, next: Next) => {
     const inputErrors = await Promise.all([
-      validateInput(ctx.request.headers, validation.headers),
-      validateInput(ctx.request.params, validation.params),
-      validateInput(ctx.request.query, validation.query),
-      validateInput(ctx.request.body, validation.body),
+      validate(ctx.request.headers, validation.headers),
+      validate(ctx.request.params, validation.params),
+      validate(ctx.request.query, validation.query),
+      validate(ctx.request.body, validation.body),
     ]).then((inputErrors) => inputErrors.filter((err) => err));
 
     if (inputErrors.length && opts?.exposeRequestErrors) {
@@ -77,17 +56,17 @@ export const validationMiddleware = <Headers, Params, Query, Body, Response>(
 
     await next();
 
-    const outputErrors = await validateOutput(ctx, validation.response);
+    const outputError = await validate(ctx.body, validation.response);
 
-    if (outputErrors?.length && opts?.exposeRequestErrors) {
+    if (outputError && opts?.exposeRequestErrors) {
       ctx.status = 500;
       ctx.type = 'json';
-      ctx.body = { outputErrors };
-      ctx.app.emit('error', new ValidationError({ outputErrors }), ctx);
+      ctx.body = { outputError };
+      ctx.app.emit('error', new ValidationError({ outputError }), ctx);
       return;
     }
 
-    if (outputErrors?.length) {
+    if (outputError) {
       ctx.throw(500);
     }
   };
