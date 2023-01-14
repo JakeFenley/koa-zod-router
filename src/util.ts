@@ -1,5 +1,5 @@
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { ValidationOptions, ZodContext, ZodMiddleware } from './types';
+import { Method, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 
 function flatten<H, P, Q, B, R>(
   middlewares: Array<ZodMiddleware<H, P, Q, B, R> | undefined>,
@@ -41,3 +41,40 @@ export const assertValidation = <H, P, Q, B, R>(val: any): val is ValidationOpti
 
   return false;
 };
+
+export const methods: Method[] = [
+  'acl',
+  'bind',
+  'checkout',
+  'connect',
+  'copy',
+  'delete',
+  'get',
+  'head',
+  'link',
+  'lock',
+  'm-search',
+  'merge',
+  'mkactivity',
+  'mkcalendar',
+  'mkcol',
+  'move',
+  'notify',
+  'options',
+  'patch',
+  'post',
+  'propfind',
+  'proppatch',
+  'purge',
+  'put',
+  'rebind',
+  'report',
+  'search',
+  'source',
+  'subscribe',
+  'trace',
+  'unbind',
+  'unlink',
+  'unlock',
+  'unsubscribe',
+];

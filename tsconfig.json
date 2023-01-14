@@ -13,7 +13,7 @@
     "outDir": "./dist",
     "typeRoots": ["src/@types"],
     "strict": true,
-    "rootDirs": ["src", "test"],
+    "rootDirs": ["src", "test", "examples"],
     "alwaysStrict": true,
     "isolatedModules": true,
     "strictNullChecks": true,
@@ -21,6 +21,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true
   },
-  "include": ["src", "test"],
+  "include": ["src", "test", "examples"],
   "exclude": ["node_modules", "dist"]
 }

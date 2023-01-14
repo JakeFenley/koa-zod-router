@@ -1,47 +1,10 @@
 import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, ZodMiddleware, RouterOpts } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
-import { prepareMiddleware } from './util';
+import { methods, prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
 import { multipartParserMiddleware } from './multipart-parser-middleware';
-
-const methods: Method[] = [
-  'acl',
-  'bind',
-  'checkout',
-  'connect',
-  'copy',
-  'delete',
-  'get',
-  'head',
-  'link',
-  'lock',
-  'm-search',
-  'merge',
-  'mkactivity',
-  'mkcalendar',
-  'mkcol',
-  'move',
-  'notify',
-  'options',
-  'patch',
-  'post',
-  'propfind',
-  'proppatch',
-  'purge',
-  'put',
-  'rebind',
-  'report',
-  'search',
-  'source',
-  'subscribe',
-  'trace',
-  'unbind',
-  'unlink',
-  'unlock',
-  'unsubscribe',
-];
 
 const zodRouter = (opts?: RouterOpts) => {
   const _router = new KoaRouter(opts?.koaRouterOpts);
@@ -49,8 +12,9 @@ const zodRouter = (opts?: RouterOpts) => {
   _router.use(multipartParserMiddleware(opts?.formidableOpts));
 
   // Delegated methods - preserves value of 'this' in KoaRouter
-  function all(...args: any[]) {
-    return _router.all(args);
+  function all() {
+    // @ts-ignore
+    return _router.all(...arguments);
   }
 
   function allowedMethods(options?: KoaRouter.RouterAllowedMethodsOptions) {
@@ -85,8 +49,8 @@ const zodRouter = (opts?: RouterOpts) => {
     return _router.routes();
   }
 
-  function use(...args: any[]) {
-    return _router.use(args);
+  function use() {
+    return _router.use(...arguments);
   }
 
   function url(name: string, params?: any, options?: KoaRouter.UrlOptionsQuery) {
