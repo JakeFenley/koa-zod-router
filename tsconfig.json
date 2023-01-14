@@ -3,7 +3,7 @@
     "baseUrl": ".",
     "lib": ["es2022"],
     "declaration": true,
-    "rootDir": "src",
+    "rootDir": ".",
     "target": "ES2022",
     "module": "CommonJS",
     "moduleResolution": "Node",
@@ -13,7 +13,7 @@
     "outDir": "./dist",
     "typeRoots": ["src/@types"],
     "strict": true,
-    "rootDirs": ["src"],
+    "rootDirs": ["src", "test"],
     "alwaysStrict": true,
     "isolatedModules": true,
     "strictNullChecks": true,
@@ -21,6 +21,6 @@
     "noImplicitReturns": true,
     "noImplicitThis": true
   },
-  "include": ["src"],
+  "include": ["src", "test"],
   "exclude": ["node_modules", "dist"]
 }
