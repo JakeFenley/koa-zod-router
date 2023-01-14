@@ -28,6 +28,7 @@
     "@types/koa-bodyparser": "^4.3.10",
     "@types/koa__router": "^12.0.0",
     "@types/node": "^18.11.18",
+    "@types/supertest": "^2.0.12",
     "@typescript-eslint/eslint-plugin": "^5.48.1",
     "@typescript-eslint/parser": "^5.48.1",
     "eslint": "^8.31.0",

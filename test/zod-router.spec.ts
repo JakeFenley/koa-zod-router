@@ -3,9 +3,10 @@ import { describe, it } from 'node:test';
 import { methods } from '../src/util';
 import KoaRouter from '@koa/router';
 import zodRouter from '../src/zod-router';
+import { createApp, request } from './test-utils';
+import { z } from 'zod';
 
 describe('zodRouter', () => {
-  // Unit tests
   it('should have functions for all http methods', () => {
     const router = zodRouter();
 
@@ -38,7 +39,6 @@ describe('zodRouter', () => {
     assert(route?.name === 'post-example');
   });
 
-  // Integration tests
   it('all should use koa-router implementation', () => {
     const router = zodRouter();
 
@@ -81,7 +81,7 @@ describe('zodRouter', () => {
 
   it('prefix should use koa-router implementation', () => {
     const router = zodRouter();
-    router.prefix('test-prefix');
+    router.prefix('/test-prefix');
 
     router.register({
       method: 'get',
@@ -92,5 +92,106 @@ describe('zodRouter', () => {
 
     const route = router.route('example') as KoaRouter.Layer;
     assert(route?.opts.prefix === '/test-prefix');
+  });
+
+  it('should strip invalid fields from output', async () => {
+    const router = zodRouter();
+    const validation = z.object({ hello: z.string() }).or(z.object({ second: z.string() }));
+
+    router.get(
+      '/',
+      (ctx) => {
+        // @ts-ignore - purposefully ignore bad type
+        ctx.body = { hello: 'world', invalid: 'should get stripped', second: 'should get stripped' };
+      },
+      {
+        response: validation,
+      },
+    );
+
+    router.get(
+      '/second',
+      (ctx) => {
+        // @ts-ignore - purposefully ignore bad type
+        ctx.body = { invalid: 'should get stripped', second: 'should be here' };
+      },
+      {
+        response: validation,
+      },
+    );
+
+    const app = createApp(router);
+    await request(app)
+      .get('/')
+      .then((response) => {
+        assert.equal(response.body.second, undefined);
+        assert.equal(response.body.invalid, undefined);
+        assert.equal(response.body.hello, 'world');
+      });
+
+    await request(app)
+      .get('/second')
+      .then((response) => {
+        assert.equal(response.body.second, 'should be here');
+        assert.equal(response.body.invalid, undefined);
+      });
+  });
+
+  it('exposeResponseErrors: true - should send response validation errors in response body', async () => {
+    const router = zodRouter({ zodRouterOpts: { exposeResponseErrors: true } });
+
+    router.post('/', (ctx, next) => {}, { response: z.object({ test: z.boolean() }) });
+
+    const app = createApp(router);
+
+    const res = await request(app).post('/');
+
+    assert(res.body?.error?.issues.length === 1);
+    assert(res.status === 500);
+  });
+
+  it('exposeResponseErrors: false - should not send response validation errors in response body', async () => {
+    const router = zodRouter({ zodRouterOpts: { exposeResponseErrors: false } });
+
+    router.patch('/', (ctx, next) => {}, { response: z.object({ test: z.boolean() }) });
+
+    const app = createApp(router);
+
+    const res = await request(app).patch('/');
+
+    assert(res.body?.error?.issues === undefined);
+    assert(res.status === 500);
+  });
+
+  it('exposeRequestErrors: true - should send request validation errors in response body', async () => {
+    const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: true } });
+
+    router.delete('/', (ctx, next) => {}, {
+      query: z.object({ test: z.string() }),
+      body: z.object({ hello: z.string() }),
+      headers: z.object({ 'x-test-header': z.string() }),
+    });
+
+    const app = createApp(router);
+
+    const res = await request(app).delete('/');
+
+    console.log(JSON.stringify(res));
+
+    assert(res.body?.error?.length === 3);
+    assert(res.status === 400);
+  });
+
+  it('exposeRequestErrors: false - should not send request validation errors in response body', async () => {
+    const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: false } });
+
+    router.put('/', (ctx, next) => {}, { query: z.object({ test: z.string() }) });
+
+    const app = createApp(router);
+
+    const res = await request(app).put('/');
+
+    assert(res.body?.error?.issues === undefined);
+    assert(res.status === 400);
   });
 });

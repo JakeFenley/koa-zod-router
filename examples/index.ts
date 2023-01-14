@@ -1,7 +1,6 @@
 import Koa from 'koa';
 import { z } from 'zod';
 import zodRouter from '../src/zod-router';
-import KoaRouter from '@koa/router';
 
 const app = new Koa();
 
@@ -53,9 +52,7 @@ router.register({
   },
 });
 
-router.param('/test', () => {});
 app.use(router.routes());
-console.log(router.stack);
 
 app.listen(3000, () => {
   console.log('app listening on http://localhost:3000');
