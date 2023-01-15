@@ -10,3 +10,7 @@ yarn-error.log
 .eslintrc.json
 coverage
 .prettierrc.json
+.mocharc.json
+.vscode
+tmp
+.eslintcache
