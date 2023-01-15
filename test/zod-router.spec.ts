@@ -310,7 +310,6 @@ describe('zodRouter', () => {
     await request(app)
       .get('/test/1/hello')
       .then((res) => {
-        console.log(res.status);
         assert(res.status === 200);
         assert(res.body.success === true);
       });
@@ -318,7 +317,6 @@ describe('zodRouter', () => {
     await request(app)
       .get('/test/ffff/hello')
       .then((res) => {
-        console.log(res.status);
         assert(res.status === 400);
         assert(res.body.success === undefined);
       });

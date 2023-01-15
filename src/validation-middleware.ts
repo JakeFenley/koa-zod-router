@@ -14,26 +14,10 @@ const parsedSuccessful = <Input, Output>(
   return parsed.success;
 };
 
-const validateInput = async <T>(
-  data: unknown,
-  schema?: ZodType<T, ZodTypeDef, T>,
-): Promise<ZodError<T> | undefined> => {
-  if (!schema) {
-    return undefined;
-  }
-  const parsed = await schema.safeParseAsync(data);
-  if (!parsedSuccessful(parsed)) {
-    return parsed.error;
-  }
-
-  return undefined;
-};
-
-const validateOutput = async <T>(
+const validate = async <T>(
   data: unknown,
   schema?: ZodTypeAny,
-  opts?: RouterOpts['zodRouterOpts'],
-): Promise<ZodError<T> | SafeParseSuccess<ZodTypeAny> | undefined> => {
+): Promise<ZodError<T> | Record<string, any> | undefined> => {
   if (!schema) {
     return undefined;
   }
@@ -42,7 +26,8 @@ const validateOutput = async <T>(
   if (!parsedSuccessful(parsed)) {
     return parsed.error;
   }
-  return parsed;
+
+  return parsed.data;
 };
 
 export const validationMiddleware = <H, P, Q, B, R>(
@@ -55,12 +40,48 @@ export const validationMiddleware = <H, P, Q, B, R>(
 
   return async (ctx: DefaultContext, next: Next) => {
     // Input validation
-    const inputErrors = await Promise.all([
-      validateInput(ctx.request.headers, validation.headers),
-      validateInput(ctx.request.params, validation.params),
-      validateInput(ctx.request.query, validation.query),
-      validateInput(ctx.request.body, validation.body),
-    ]).then((inputErrors) => inputErrors.filter((err) => err));
+    let inputErrors: ZodError[] = [];
+
+    const [headers, params, query, body] = await Promise.all([
+      validate(ctx.request.headers, validation.headers),
+      validate(ctx.request.params, validation.params),
+      validate(ctx.request.query, validation.query),
+      validate(ctx.request.body, validation.body),
+    ]);
+
+    if (headers) {
+      if (headers instanceof ZodError) {
+        inputErrors.push(headers);
+      } else {
+        Object.keys(headers).forEach((header) => {
+          ctx.request.headers[header] = headers[header];
+        });
+      }
+    }
+
+    if (params) {
+      if (params instanceof ZodError) {
+        inputErrors.push(params);
+      } else {
+        ctx.request.params = params;
+      }
+    }
+
+    if (query) {
+      if (query instanceof ZodError) {
+        inputErrors.push(query);
+      } else {
+        ctx.request.query = query;
+      }
+    }
+
+    if (body) {
+      if (body instanceof ZodError) {
+        inputErrors.push(body);
+      } else {
+        ctx.request.body = body;
+      }
+    }
 
     if (inputErrors.length && opts?.exposeRequestErrors) {
       ctx.status = 400;
@@ -77,7 +98,7 @@ export const validationMiddleware = <H, P, Q, B, R>(
     await next();
 
     // Output validation
-    const output = await validateOutput(ctx.body, validation.response, opts);
+    const output = await validate(ctx.body, validation.response);
 
     if (!output) {
       return;
@@ -94,8 +115,8 @@ export const validationMiddleware = <H, P, Q, B, R>(
 
       ctx.throw(500);
     } else {
-      ctx.body = output.data;
-      ctx.response.body = output.data;
+      ctx.body = output;
+      ctx.response.body = output;
     }
   };
 };
