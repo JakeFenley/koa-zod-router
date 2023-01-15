@@ -9,6 +9,7 @@
     "build": "tsc --build tsconfig.build.json",
     "example": "ts-node-dev examples/index.ts",
     "test": "mocha",
+    "test:coverage": "nyc --reporter=text mocha",
     "lint": "eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\""
   },
   "author": {
@@ -38,6 +39,7 @@
     "husky": "^8.0.3",
     "koa": "^2.14.1",
     "mocha": "^10.2.0",
+    "nyc": "^15.1.0",
     "prettier": "^2.8.2",
     "sinon": "^15.0.1",
     "supertest": "^6.3.3",

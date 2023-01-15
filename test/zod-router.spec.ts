@@ -230,7 +230,7 @@ describe('zodRouter', () => {
     router.get({
       path: '/',
       handlers: (ctx) => {
-        ctx.body = { success: true };
+        ctx.body = { test: ctx.request.query.test };
       },
       validate: {
         query: z.object({ test: z.string() }),
@@ -242,8 +242,9 @@ describe('zodRouter', () => {
     await request(app)
       .get('/?test=hello')
       .then((res) => {
+        console.log(JSON.stringify(res));
         assert(res.status === 200);
-        assert(res.body.success === true);
+        assert(res.body.test === 'hello');
       });
 
     await request(app)
@@ -261,7 +262,7 @@ describe('zodRouter', () => {
       method: 'post',
       path: '/',
       handlers: (ctx) => {
-        ctx.body = { success: true };
+        ctx.body = { test: ctx.request.body.test };
       },
       validate: {
         body: z.object({
@@ -277,7 +278,7 @@ describe('zodRouter', () => {
       .send({ test: 'hello' })
       .then((res) => {
         assert(res.status === 200);
-        assert(res.body.success === true);
+        assert(res.body.test === 'hello');
       });
 
     await request(app)
@@ -288,14 +289,14 @@ describe('zodRouter', () => {
       });
   });
 
-  it('params are validated', async () => {
-    const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: true } });
+  it('path params are validated', async () => {
+    const router = zodRouter();
 
     router.register({
       method: 'get',
       path: '/test/:id/:sku',
       handlers: (ctx) => {
-        ctx.body = { success: true };
+        ctx.body = { id: ctx.request.params.id, sku: ctx.request.params.sku };
       },
       validate: {
         params: z.object({
@@ -311,7 +312,7 @@ describe('zodRouter', () => {
       .get('/test/1/hello')
       .then((res) => {
         assert(res.status === 200);
-        assert(res.body.success === true);
+        assert(res.body.id === 1 && res.body.sku === 'hello');
       });
 
     await request(app)
@@ -319,6 +320,40 @@ describe('zodRouter', () => {
       .then((res) => {
         assert(res.status === 400);
         assert(res.body.success === undefined);
+      });
+  });
+
+  it('headers are validated', async () => {
+    const router = zodRouter();
+
+    router.register({
+      method: 'patch',
+      path: '/',
+      handlers: (ctx) => {
+        ctx.body = { test: ctx.request.headers.test };
+      },
+      validate: {
+        headers: z.object({
+          test: z.string(),
+        }),
+      },
+    });
+
+    const app = createApp(router);
+
+    await request(app)
+      .patch('/')
+      .set('test', 'hello')
+      .then((res) => {
+        assert(res.body.test === 'hello');
+      });
+
+    await request(app)
+      .patch('/')
+      .then((res) => {
+        console.log(JSON.stringify(res));
+        assert(res.body.test === undefined);
+        assert(res.status === 400);
       });
   });
 });
