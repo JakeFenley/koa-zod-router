@@ -41,10 +41,6 @@ export type Method =
   | 'unlock'
   | 'unsubscribe';
 
-type RequireKeys<T> = {
-  [P in keyof Required<T>]: Pick<T, P> extends Required<Pick<T, P>> ? T[P] : T[P] | undefined;
-};
-
 export type InferedSchema<T> = z.infer<ZodSchema<T>>;
 
 export interface ZodContext<Headers, Params, Query, Body> {

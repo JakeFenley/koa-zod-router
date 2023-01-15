@@ -1,16 +1,16 @@
 {
   "name": "koa-zod-router",
-  "version": "0.0.1",
+  "version": "0.9.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "type": "commonjs",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc --build tsconfig.build.json",
     "example": "ts-node-dev examples/index.ts",
     "test": "mocha",
     "lint": "eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\""
   },
-  "keywords": [],
   "author": {
     "name": "Jake Fenley",
     "url": "https://github.com/jakefenley"
@@ -20,6 +20,7 @@
     "@koa/router": "^12.0.0",
     "formidable": "^2.1.1",
     "koa-bodyparser": "^4.3.0",
+    "koa-zod-router": "^0.9.0",
     "zod": "^3.20.2"
   },
   "devDependencies": {
@@ -47,5 +48,22 @@
   },
   "peerDependencies": {
     "zod": "^3.20.2"
-  }
+  },
+  "keywords": [
+    "nodejs",
+    "api",
+    "http",
+    "middleware",
+    "koa",
+    "router",
+    "json",
+    "typescript",
+    "schema",
+    "server",
+    "handler",
+    "schema-validation",
+    "endpoint",
+    "zod",
+    "validation"
+  ]
 }

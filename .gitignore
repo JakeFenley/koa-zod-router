@@ -3,3 +3,4 @@ dist
 tmp
 .vscode
 .eslintcache
+.npmrc
