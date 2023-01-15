@@ -72,7 +72,7 @@ export type Spec<H, P, Q, B, R> = {
 };
 
 export type RegisterSpec<H, P, Q, B, R> = {
-  method: Method;
+  method: Method | Method[];
   opts?: LayerOptions;
 } & Spec<H, P, Q, B, R>;
 

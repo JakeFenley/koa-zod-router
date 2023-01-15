@@ -193,6 +193,41 @@ describe('zodRouter', () => {
     assert(res.status === 400);
   });
 
+  it('register allows for multiple methods', async () => {
+    const router = zodRouter();
+
+    router.register({
+      path: '/',
+      method: ['patch', 'post'],
+      handlers: (ctx) => {
+        const { test } = ctx.request.body;
+        ctx.body = { success: Boolean(test) };
+      },
+      validate: {
+        body: z.object({ test: z.string() }),
+        response: z.object({ success: z.boolean() }),
+      },
+    });
+
+    const app = createApp(router);
+
+    await request(app)
+      .patch('/')
+      .send({ test: 'hello' })
+      .then((res) => {
+        assert(res.status === 200);
+        assert(res.body.success === true);
+      });
+
+    await request(app)
+      .post('/')
+      .send({ test: 'hello' })
+      .then((res) => {
+        assert(res.status === 200);
+        assert(res.body.success === true);
+      });
+  });
+
   it('http method functions work with path or route spec as first arg', async () => {
     const router = zodRouter();
 
@@ -242,7 +277,6 @@ describe('zodRouter', () => {
     await request(app)
       .get('/?test=hello')
       .then((res) => {
-        console.log(JSON.stringify(res));
         assert(res.status === 200);
         assert(res.body.test === 'hello');
       });
@@ -351,7 +385,6 @@ describe('zodRouter', () => {
     await request(app)
       .patch('/')
       .then((res) => {
-        console.log(JSON.stringify(res));
         assert(res.body.test === undefined);
         assert(res.status === 400);
       });
