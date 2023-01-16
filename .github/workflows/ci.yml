@@ -41,26 +41,11 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-  test:
-    runs-on: ubuntu-latest
-    needs: install
-
-    steps:
       - name: test
         run: pnpm test:coverage
-
-  lint:
-    runs-on: ubuntu-latest
-    needs: install
-
-    steps:
-      - name: test
+      
+      - name: lint
         run: pnpm lint
-
-  build:
-    runs-on: ubuntu-latest
-    needs: install
-
-    steps:
-      - name: test
+      
+      - name: build
         run: pnpm build
