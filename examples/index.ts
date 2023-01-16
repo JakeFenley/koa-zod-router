@@ -31,29 +31,31 @@ router.post(
 router.register({
   name: 'post-example',
   method: 'post',
-  path: '/post/:id',
+  path: '/post',
   pre: async (ctx, next) => {
     //... pre-handler
     await next();
   },
   handlers: [
     async (ctx, next) => {
-      const { foo } = ctx.request.body;
-      const { bar } = ctx.request.query;
-      const { id } = ctx.request.params;
-      ctx.request.headers['x-test-header'];
-      ctx.body = { hello: 'world' };
+      // const { foo } = ctx.request.body;
+      // const { bar } = ctx.request.query;
+      // const { id } = ctx.request.params;
+      // ctx.request.headers['x-test-header'];
+      // ctx.body = { hello: 'world' };
+      ctx.body = { test: ctx.request.files.test.toJSON().originalFilename };
+
       await next();
     },
   ],
   validate: {
-    body: z.object({ foo: z.number() }),
-    params: z.object({ id: z.coerce.number() }),
-    query: z.object({ bar: z.string() }),
-    headers: z.object({ 'x-test-header': z.string() }),
-    response: z.object({ hello: z.string() }),
+    // body: z.object({ foo: z.number() }),
+    // params: z.object({ id: z.coerce.number() }),
+    // query: z.object({ bar: z.string() }),
+    // headers: z.object({ 'x-test-header': z.string() }),
+    // response: z.object({ hello: z.string() }),
     files: z.object({
-      some_file: zFile(),
+      test: zFile(),
     }),
   },
 });

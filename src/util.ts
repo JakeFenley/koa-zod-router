@@ -1,4 +1,4 @@
-import { File } from 'formidable';
+import { PersistentFile, VolatileFile } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z } from 'zod';
 import { Method, ValidationOptions, ZodContext, ZodMiddleware } from './types';
@@ -31,7 +31,7 @@ export async function noopMiddleware(ctx: Context, next: Next) {
 }
 
 export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationOptions<H, P, Q, B, F, R> => {
-  const props = ['headers', 'body', 'query', 'params', 'response'];
+  const props = ['headers', 'body', 'query', 'params', 'files', 'response'];
 
   if (typeof val === 'object') {
     for (const prop of props) {
@@ -45,7 +45,7 @@ export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationO
 };
 
 export const zFile = () => {
-  return z.instanceof(File);
+  return z.instanceof(PersistentFile).or(z.instanceof(VolatileFile));
 };
 
 export const methods: Method[] = [

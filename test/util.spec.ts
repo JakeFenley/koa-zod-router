@@ -75,6 +75,11 @@ describe('assertValidation', () => {
     assert.equal(validation, true);
   });
 
+  it('should return true when files prop response exists', () => {
+    const validation = assertValidation({ files: {} });
+    assert.equal(validation, true);
+  });
+
   it('should return true when provided a mix of props', () => {
     const validation = assertValidation({ response: {}, params: {}, body: {} });
     assert.equal(validation, true);

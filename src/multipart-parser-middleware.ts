@@ -21,6 +21,6 @@ export const multipartParserMiddleware = (options?: formidable.Options) => {
         resolve();
       });
     });
-    next();
+    await next();
   };
 };

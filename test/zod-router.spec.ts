@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { describe, it } from 'node:test';
-import { methods } from '../src/util';
+import { methods, zFile } from '../src/util';
 import KoaRouter from '@koa/router';
 import zodRouter from '../src/zod-router';
 import { createApp, request } from './test-utils';
@@ -299,7 +299,7 @@ describe('zodRouter', () => {
         });
 
       await request(app)
-        .get('/test/ffff/hello')
+        .get('/test/string/hello')
         .then((res) => {
           assert(res.status === 400);
           assert(res.body.success === undefined);
@@ -338,9 +338,43 @@ describe('zodRouter', () => {
           assert(res.status === 400);
         });
     });
+
+    it('files are validated', async () => {
+      const router = zodRouter({ zodRouter: { enableMultipart: true } });
+
+      router.register({
+        method: 'patch',
+        path: '/',
+        handlers: (ctx) => {
+          ctx.body = { test: ctx.request.files.test.toJSON().originalFilename };
+        },
+        validate: {
+          files: z.object({
+            test: zFile(),
+          }),
+        },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .patch('/')
+        .set('Content-Type', 'multipart/form-data')
+        .attach('test', 'package.json')
+        .then((res) => {
+          assert(res.body.test === 'package.json');
+        });
+
+      await request(app)
+        .patch('/')
+        .then((res) => {
+          assert(res.body?.test === undefined);
+          assert(res.status === 400);
+        });
+    });
   });
 
-  describe('option', () => {
+  describe('options', () => {
     it('exposeResponseErrors: true - should send response validation errors in response body', async () => {
       const router = zodRouter({ zodRouter: { exposeResponseErrors: true } });
 

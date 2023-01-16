@@ -43,11 +43,12 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     // Input validation
     let inputErrors: ZodError[] = [];
 
-    const [headers, params, query, body] = await Promise.all([
+    const [headers, params, query, body, files] = await Promise.all([
       validate(ctx.request.headers, validation.headers),
       validate(ctx.request.params, validation.params),
       validate(ctx.request.query, validation.query),
       validate(ctx.request.body, validation.body),
+      validate(ctx.request.files, validation.files),
     ]);
 
     if (headers) {
@@ -81,6 +82,14 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
         inputErrors.push(body);
       } else {
         ctx.request.body = body;
+      }
+    }
+
+    if (files) {
+      if (files instanceof ZodError) {
+        inputErrors.push(files);
+      } else {
+        ctx.request.files = files;
       }
     }
 
