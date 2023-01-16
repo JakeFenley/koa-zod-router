@@ -20,7 +20,6 @@ specifiers:
   husky: ^8.0.3
   koa: ^2.14.1
   koa-bodyparser: ^4.3.0
-  koa-zod-router: ^0.9.12
   mocha: ^10.2.0
   nyc: ^15.1.0
   prettier: ^2.8.2
@@ -36,7 +35,6 @@ dependencies:
   '@koa/router': 12.0.0
   formidable: 2.1.1
   koa-bodyparser: 4.3.0
-  koa-zod-router: 0.9.12_zod@3.20.2
   zod: 3.20.2
 
 devDependencies:
@@ -3054,17 +3052,6 @@ packages:
       co: 4.6.0
       koa-compose: 4.1.0
     dev: true
-
-  /koa-zod-router/0.9.12_zod@3.20.2:
-    resolution: {integrity: sha512-qfmGv6FaBGxxyk4DJAT9+gKaODuN2O4ZOmaZSwOLbioDzpsPIMPhVO0BvwbHudLXw09WDAPEyrWDfzh+CAdLhw==}
-    peerDependencies:
-      zod: '>=3.20.2 <4.x'
-    dependencies:
-      '@koa/router': 12.0.0
-      formidable: 2.1.1
-      koa-bodyparser: 4.3.0
-      zod: 3.20.2
-    dev: false
 
   /koa/2.14.1:
     resolution: {integrity: sha512-USJFyZgi2l0wDgqkfD27gL4YGno7TfUkcmOe6UOLFOVuN+J7FwnNu4Dydl4CUQzraM1lBAiGed0M9OVJoT0Kqw==}
