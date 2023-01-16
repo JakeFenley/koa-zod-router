@@ -5,7 +5,7 @@ import zodRouter from '../src/zod-router';
 const app = new Koa();
 
 const router = zodRouter({
-  zodRouterOpts: { exposeRequestErrors: true, exposeResponseErrors: true },
+  zodRouterOpts: { exposeRequestErrors: true, exposeResponseErrors: true, enableMultipart: true },
 });
 
 router.post(
