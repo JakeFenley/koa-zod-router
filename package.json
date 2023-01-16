@@ -11,7 +11,8 @@
     "example": "tsup examples/index.ts --watch",
     "test": "mocha",
     "test:coverage": "nyc --reporter=text mocha",
-    "lint": "tsc && eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\""
+    "lint": "tsc && eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\"",
+    "release": "pnpm build && npm publish"
   },
   "author": {
     "name": "Jake Fenley",

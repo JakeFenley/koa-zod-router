@@ -3,5 +3,4 @@ dist
 tmp
 .vscode
 .eslintcache
-.npmrc
 .nyc_output
