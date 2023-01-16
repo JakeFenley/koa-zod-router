@@ -31,8 +31,8 @@ const validate = async <T>(
   return parsed.data;
 };
 
-export const validationMiddleware = <H, P, Q, B, R>(
-  validation?: ValidationOptions<H, P, Q, B, R>,
+export const validationMiddleware = <H, P, Q, B, F, R>(
+  validation?: ValidationOptions<H, P, Q, B, F, R>,
   opts?: RouterOpts['zodRouter'],
 ) => {
   if (!assertValidation(validation)) {

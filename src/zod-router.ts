@@ -66,22 +66,40 @@ const zodRouter = (opts?: RouterOpts) => {
    * @example
    *
    * ```javascript
-   *  router.register({
-   *    path: '/',
-   *    method: 'get',
-   *    handlers: (ctx, next) => {
-   *      ctx.body = 'Hello world';
-   *      next();
+   * router.register({
+   *   name: 'post-example',
+   *   method: 'post',
+   *   path: '/post/:id',
+   *   pre: async (ctx, next) => {
+   *     //... pre-handler
+   *     await next();
+   *   },
+   *   handlers: [
+   *     async (ctx, next) => {
+   *       const { foo } = ctx.request.body;
+   *       const { bar } = ctx.request.query;
+   *       const { id } = ctx.request.params;
+   *       ctx.request.headers['x-test-header'];
+   *       ctx.body = { hello: 'world' };
+   *       await next();
    *     },
-   *     validate: {
-   *       output: z.string(),
-   *     },
-   *  });
+   *   ],
+   *   validate: {
+   *     body: z.object({ foo: z.number() }),
+   *     params: z.object({ id: z.coerce.number() }),
+   *     query: z.object({ bar: z.string() }),
+   *     headers: z.object({ 'x-test-header': z.string() }),
+   *     response: z.object({ hello: z.string() }),
+   *     files: z.object({
+   *       some_file: zFile(),
+   *     }),
+   *   },
+   * });
    * ```
    */
 
-  function register<H = unknown, P = unknown, Q = unknown, B = unknown, R = unknown>(
-    spec: RegisterSpec<H, P, Q, B, R>,
+  function register<H = unknown, P = unknown, Q = unknown, B = unknown, F = unknown, R = unknown>(
+    spec: RegisterSpec<H, P, Q, B, F, R>,
   ) {
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
@@ -100,10 +118,10 @@ const zodRouter = (opts?: RouterOpts) => {
 
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
-      acc[method] = <H, P, Q, B, R>(
-        pathOrSpec: string | Spec<H, P, Q, B, R>,
-        handlers?: ZodMiddleware<H, P, Q, B, R>,
-        validationOptions?: ValidationOptions<H, P, Q, B, R>,
+      acc[method] = <H, P, Q, B, F, R>(
+        pathOrSpec: string | Spec<H, P, Q, B, F, R>,
+        handlers?: ZodMiddleware<H, P, Q, B, F, R>,
+        validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
       ) => {
         if (typeof pathOrSpec === 'string' && handlers) {
           register({

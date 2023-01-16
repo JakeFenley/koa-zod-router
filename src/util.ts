@@ -1,10 +1,12 @@
+import { File } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
+import { z } from 'zod';
 import { Method, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 
-function flatten<H, P, Q, B, R>(
-  middlewares: Array<ZodMiddleware<H, P, Q, B, R> | undefined>,
-): Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[] {
-  const flattened = middlewares.reduce((acc: Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[], curr) => {
+function flatten<H, P, Q, B, F, R>(
+  middlewares: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
+): Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[] {
+  const flattened = middlewares.reduce((acc: Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[], curr) => {
     if (!curr) {
       return acc;
     }
@@ -18,9 +20,9 @@ function flatten<H, P, Q, B, R>(
   return flattened;
 }
 
-export const prepareMiddleware = <H, P, Q, B, R>(
-  input: Array<ZodMiddleware<H, P, Q, B, R> | undefined>,
-): Middleware<DefaultState, ZodContext<H, P, Q, B>, R>[] => {
+export const prepareMiddleware = <H, P, Q, B, F, R>(
+  input: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
+): Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[] => {
   return flatten(input);
 };
 
@@ -28,7 +30,7 @@ export async function noopMiddleware(ctx: Context, next: Next) {
   return await next();
 }
 
-export const assertValidation = <H, P, Q, B, R>(val: any): val is ValidationOptions<H, P, Q, B, R> => {
+export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationOptions<H, P, Q, B, F, R> => {
   const props = ['headers', 'body', 'query', 'params', 'response'];
 
   if (typeof val === 'object') {
@@ -40,6 +42,10 @@ export const assertValidation = <H, P, Q, B, R>(val: any): val is ValidationOpti
   }
 
   return false;
+};
+
+export const zFile = () => {
+  return z.instanceof(File);
 };
 
 export const methods: Method[] = [
