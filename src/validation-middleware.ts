@@ -33,7 +33,7 @@ const validate = async <T>(
 
 export const validationMiddleware = <H, P, Q, B, R>(
   validation?: ValidationOptions<H, P, Q, B, R>,
-  opts?: RouterOpts['zodRouterOpts'],
+  opts?: RouterOpts['zodRouter'],
 ) => {
   if (!assertValidation(validation)) {
     return noopMiddleware;

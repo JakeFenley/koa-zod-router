@@ -92,10 +92,10 @@ export type RouterMethods = {
 export type ZodRouter = ReturnType<typeof zodRouter>;
 
 export interface RouterOpts {
-  bodyParserOpts?: bodyParser.Options;
-  formidableOpts?: formidable.Options;
-  koaRouterOpts?: RouterOptions;
-  zodRouterOpts?: {
+  bodyParser?: bodyParser.Options;
+  formidable?: formidable.Options;
+  koaRouter?: RouterOptions;
+  zodRouter?: {
     enableMultipart?: boolean;
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;

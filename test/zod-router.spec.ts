@@ -17,7 +17,7 @@ describe('zodRouter', () => {
     });
 
     it('register method should create a route with provided values and contain 3 middlewares', () => {
-      const router = zodRouter({ koaRouterOpts: { prefix: '/test' } });
+      const router = zodRouter({ koaRouter: { prefix: '/test' } });
       router.register({
         name: 'post-example',
         method: 'post',
@@ -342,7 +342,7 @@ describe('zodRouter', () => {
 
   describe('option', () => {
     it('exposeResponseErrors: true - should send response validation errors in response body', async () => {
-      const router = zodRouter({ zodRouterOpts: { exposeResponseErrors: true } });
+      const router = zodRouter({ zodRouter: { exposeResponseErrors: true } });
 
       router.post('/', (ctx, next) => {}, { response: z.object({ test: z.boolean() }) });
 
@@ -355,7 +355,7 @@ describe('zodRouter', () => {
     });
 
     it('exposeResponseErrors: false - should not send response validation errors in response body', async () => {
-      const router = zodRouter({ zodRouterOpts: { exposeResponseErrors: false } });
+      const router = zodRouter({ zodRouter: { exposeResponseErrors: false } });
 
       router.patch('/', [(ctx, next) => {}], { response: z.object({ test: z.boolean() }) });
 
@@ -368,7 +368,7 @@ describe('zodRouter', () => {
     });
 
     it('exposeRequestErrors: true - should send request validation errors in response body', async () => {
-      const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: true } });
+      const router = zodRouter({ zodRouter: { exposeRequestErrors: true } });
 
       router.delete('/', (ctx, next) => {}, {
         query: z.object({ test: z.string() }),
@@ -385,7 +385,7 @@ describe('zodRouter', () => {
     });
 
     it('exposeRequestErrors: false - should not send request validation errors in response body', async () => {
-      const router = zodRouter({ zodRouterOpts: { exposeRequestErrors: false } });
+      const router = zodRouter({ zodRouter: { exposeRequestErrors: false } });
 
       router.put('/', (ctx, next) => {}, { query: z.object({ test: z.string() }) });
 
@@ -401,10 +401,10 @@ describe('zodRouter', () => {
   describe('multipart', () => {
     it('should be able to receive multiple values for fields and files', async () => {
       const router = zodRouter({
-        formidableOpts: {
+        formidable: {
           uploadDir: '/tmp',
         },
-        zodRouterOpts: { enableMultipart: true },
+        zodRouter: { enableMultipart: true },
       });
 
       router.register({

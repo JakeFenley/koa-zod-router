@@ -7,11 +7,11 @@ import { validationMiddleware } from './validation-middleware';
 import { multipartParserMiddleware } from './multipart-parser-middleware';
 
 const zodRouter = (opts?: RouterOpts) => {
-  const _router = new KoaRouter(opts?.koaRouterOpts);
-  _router.use(bodyParser(opts?.bodyParserOpts));
+  const _router = new KoaRouter(opts?.koaRouter);
+  _router.use(bodyParser(opts?.bodyParser));
 
-  if (opts?.zodRouterOpts?.enableMultipart) {
-    _router.use(multipartParserMiddleware(opts?.formidableOpts));
+  if (opts?.zodRouter?.enableMultipart) {
+    _router.use(multipartParserMiddleware(opts?.formidable));
   }
 
   // Delegated methods - preserves value of 'this' in KoaRouter
@@ -91,7 +91,7 @@ const zodRouter = (opts?: RouterOpts) => {
       spec.path,
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
-      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouterOpts), spec.handlers]),
+      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handlers]),
       { name },
     );
 
