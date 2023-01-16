@@ -50,3 +50,11 @@ jobs:
       
       - name: build
         run: pnpm build:turbo
+
+      - name: coveralls
+        uses: coverallsapp/github-action@1.1.3
+        continue-on-error: true
+        with:
+          github-token: ${{ secrets.github_token }}
+          flag-name: run-${{ matrix.node-version }}
+          parallel: true        
