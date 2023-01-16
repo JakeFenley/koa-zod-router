@@ -8,11 +8,14 @@
   "type": "commonjs",
   "scripts": {
     "build": "rm -rf dist && tsup src/index.ts --format cjs,esm --dts",
+    "build:turbo": "turbo run build",
     "example": "tsup examples/index.ts --watch",
     "test": "mocha",
     "test:coverage": "nyc --reporter=text mocha",
+    "test:turbo": "turbo run test:coverage",
     "lint": "tsc && eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\"",
-    "release": "pnpm build && npm publish"
+    "lint:turbo": "turbo run lint",
+    "release": "pnpm build:turbo && npm publish"
   },
   "author": {
     "name": "Jake Fenley",
