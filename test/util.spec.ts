@@ -1,6 +1,7 @@
 import assert from 'assert';
+import formidable from 'formidable';
 import { describe, it } from 'node:test';
-import { prepareMiddleware, assertValidation, assertHandlers } from '../src/util';
+import { prepareMiddleware, assertValidation, assertHandlers, assertFormidableError } from '../src/util';
 
 describe('prepareMiddleware', () => {
   it('should flatten array of handlers', () => {
@@ -76,5 +77,17 @@ describe('assertHandlers', () => {
 
   it('should assert string as argument to be false', () => {
     assert(!assertHandlers('str'));
+  });
+});
+
+describe('assertFormidableError', () => {
+  it('should assert FormidableError instance to be true', () => {
+    const assertion = assertFormidableError(new formidable.errors.FormidableError('whoops', 12312));
+    assert(assertion);
+  });
+
+  it('should assert Error instance to be false', () => {
+    const assertion = assertFormidableError(new Error());
+    assert(!assertion);
   });
 });

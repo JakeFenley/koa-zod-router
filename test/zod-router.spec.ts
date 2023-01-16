@@ -566,5 +566,64 @@ describe('zodRouter', () => {
           assert(res.body.file_two.originalFilename === 'tsconfig.json');
         });
     });
+
+    it('response should contain FormidableError 4xx httpCode when client error occurs', async () => {
+      const router = zodRouter({
+        formidable: {
+          uploadDir: '/tmp',
+          maxFields: 2,
+        },
+        zodRouter: { enableMultipart: true },
+      });
+
+      router.register({
+        path: '/test',
+        method: 'put',
+        handlers: (ctx) => {
+          ctx.status = 201;
+        },
+        validate: { body: z.object({ hello: z.array(z.string()) }) },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .put('/test')
+        .type('multipart/form-data')
+        .field('hello', 'foo')
+        .field('hello2', 'bar')
+        .field('hello3', 'uh oh')
+        .then((res) => {
+          assert(res.status === 413);
+        });
+    });
+
+    it('response should contain 5xx httpCode when server error is thrown', async () => {
+      const router = zodRouter({
+        formidable: {
+          uploadDir: '/tmp',
+          enabledPlugins: [],
+        },
+        zodRouter: { enableMultipart: true },
+      });
+
+      router.register({
+        path: '/test',
+        method: 'put',
+        handlers: (ctx) => {
+          ctx.status = 201;
+        },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .put('/test')
+        .type('multipart/form-data')
+        .field('hello', 'foo')
+        .then((res) => {
+          assert(res.status === 500);
+        });
+    });
   });
 });

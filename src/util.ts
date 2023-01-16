@@ -1,7 +1,8 @@
-import { PersistentFile, VolatileFile } from 'formidable';
+import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z } from 'zod';
 import { Method, ValidationOptions, ZodContext, ZodMiddleware } from './types';
+const { FormidableError } = errors;
 
 function flatten<H, P, Q, B, F, R>(
   middlewares: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
@@ -60,6 +61,14 @@ export const assertHandlers = <H, P, Q, B, F, R>(val: any): val is ZodMiddleware
 
 export const zFile = () => {
   return z.instanceof(PersistentFile).or(z.instanceof(VolatileFile));
+};
+
+export const assertFormidableError = (val: any): val is InstanceType<typeof FormidableError> => {
+  if (val instanceof FormidableError) {
+    return true;
+  }
+
+  return false;
 };
 
 export const methods: Method[] = [
