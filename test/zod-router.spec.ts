@@ -582,7 +582,6 @@ describe('zodRouter', () => {
         handlers: (ctx) => {
           ctx.status = 201;
         },
-        validate: { body: z.object({ hello: z.array(z.string()) }) },
       });
 
       const app = createApp(router);

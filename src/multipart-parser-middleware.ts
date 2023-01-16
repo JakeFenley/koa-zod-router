@@ -30,8 +30,6 @@ export const multipartParserMiddleware = (options?: formidable.Options) => {
           ctx.status = err.httpCode;
           ctx.app.emit('error', err, ctx);
           return;
-        } else if (err.httpCode && err.httpCode >= 500) {
-          ctx.throw(err.httpCode, err);
         }
       }
       ctx.throw(500, err);
