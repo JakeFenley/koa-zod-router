@@ -1,11 +1,11 @@
-name: install
+name: ci
 
 on:
   - push
   - pull_request
 
 jobs:
-  cache-and-install:
+  install:
     runs-on: ubuntu-latest
 
     steps:
@@ -40,3 +40,27 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+  test:
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: test
+        run: pnpm test:coverage
+
+  lint:
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: test
+        run: pnpm lint
+
+  build:
+    runs-on: ubuntu-latest
+    needs: install
+
+    steps:
+      - name: test
+        run: pnpm build
