@@ -105,6 +105,15 @@ describe('zodRouter', () => {
           assert(res.body.success === true);
         });
     });
+
+    it('route method fn should throw when given invalid args', () => {
+      const router = zodRouter();
+
+      assert.throws(() => {
+        // @ts-ignore
+        router.get('/', 'str', () => {}, {});
+      }, /Invalid route arguments/);
+    });
   });
 
   describe('delegated methods', () => {
@@ -161,6 +170,90 @@ describe('zodRouter', () => {
 
       const route = router.route('example') as KoaRouter.Layer;
       assert(route?.opts.prefix === '/test-prefix');
+    });
+
+    it('redirect should use koa-router implementation correctly', async () => {
+      const router = zodRouter();
+      router.redirect('/', '/dest');
+
+      router.get('/dest', (ctx) => {});
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.status === 301);
+        });
+    });
+
+    it('route should use koa-router implementation correctly', async () => {
+      const router = zodRouter();
+
+      router.get({
+        name: 'test',
+        path: '/',
+        handlers: () => {},
+      });
+
+      assert(router.route('test'));
+      assert(!router.route('null'));
+    });
+
+    it('routes should use koa-router implementation correctly', () => {
+      const router = zodRouter();
+      const koaRouter = router.router;
+
+      // @ts-ignore
+      assert(router.routes().router.stack.length === 1);
+      // @ts-ignore
+      assert(koaRouter.routes().router.stack.length === 1);
+
+      router.get({
+        name: 'test',
+        path: '/',
+        handlers: () => {},
+      });
+
+      // @ts-ignore
+      assert(router.routes().router.stack.length === 2);
+      // @ts-ignore
+      assert(koaRouter.routes().router.stack.length === 2);
+    });
+
+    it('use should use koa-router implementation correctly', async () => {
+      const router = zodRouter();
+
+      router.use((ctx, next) => {
+        ctx.state.hello = 'hi';
+        next();
+      });
+
+      router.register({
+        path: '/',
+        method: 'get',
+        handlers: (ctx, next) => {
+          ctx.body = { hello: ctx.state.hello };
+          next();
+        },
+        validate: { response: z.object({ hello: z.string() }) },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.body.hello === 'hi');
+        });
+    });
+
+    it('url should use koa-router implementation correctly', () => {
+      const router = zodRouter();
+
+      router.register({ name: 'users', method: 'get', path: '/users/:id', handlers: () => {} });
+
+      assert(router.url('users', 3) === '/users/3');
     });
   });
 
@@ -446,16 +539,15 @@ describe('zodRouter', () => {
         method: 'put',
         handlers: (ctx) => {
           ctx.status = 201;
-          // @ts-ignore
           const { test_file } = ctx.request.files;
 
           ctx.body = {
-            // @ts-ignore
             hello: ctx.request.body.hello.join(''),
             file_one: test_file[0],
             file_two: test_file[1],
           };
         },
+        validate: { body: z.object({ hello: z.array(z.string()) }), files: z.object({ test_file: z.array(zFile()) }) },
       });
 
       const app = createApp(router);

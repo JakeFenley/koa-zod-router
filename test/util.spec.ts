@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { describe, it } from 'node:test';
-import { prepareMiddleware, assertValidation } from '../src/util';
+import { prepareMiddleware, assertValidation, assertHandlers } from '../src/util';
 
 describe('prepareMiddleware', () => {
   it('should flatten array of handlers', () => {
@@ -50,5 +50,31 @@ describe('assertValidation', () => {
   it('should return true when provided a mix of props', () => {
     const validation = assertValidation({ response: {}, params: {}, body: {} });
     assert(validation);
+  });
+});
+
+describe('assertHandlers', () => {
+  it('should assert array of handlers to be true', () => {
+    const assertion = assertHandlers([() => {}, () => {}, () => {}]);
+
+    assert(assertion);
+  });
+
+  it('should assert array of handlers and strings to be false', () => {
+    const assertionOne = assertHandlers([() => {}, () => {}, () => {}, 'str']);
+
+    assert(!assertionOne);
+
+    const assertionTwo = assertHandlers(['str', () => {}, () => {}, () => {}]);
+
+    assert(!assertionOne);
+  });
+
+  it('should assert function as argument to be true', () => {
+    assert(assertHandlers(() => {}));
+  });
+
+  it('should assert string as argument to be false', () => {
+    assert(!assertHandlers('str'));
   });
 });

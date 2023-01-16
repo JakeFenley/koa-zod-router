@@ -44,6 +44,20 @@ export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationO
   return false;
 };
 
+export const assertHandlers = <H, P, Q, B, F, R>(val: any): val is ZodMiddleware<H, P, Q, B, F, R> => {
+  if (Array.isArray(val)) {
+    for (const fn of val) {
+      if (typeof fn !== 'function') {
+        return false;
+      }
+    }
+  } else if (typeof val !== 'function') {
+    return false;
+  }
+
+  return true;
+};
+
 export const zFile = () => {
   return z.instanceof(PersistentFile).or(z.instanceof(VolatileFile));
 };

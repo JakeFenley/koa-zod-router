@@ -1,6 +1,6 @@
 import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, ZodMiddleware, RouterOpts } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
-import { methods, prepareMiddleware } from './util';
+import { assertHandlers, methods, prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
@@ -123,7 +123,7 @@ const zodRouter = (opts?: RouterOpts) => {
         handlers?: ZodMiddleware<H, P, Q, B, F, R>,
         validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
       ) => {
-        if (typeof pathOrSpec === 'string' && handlers) {
+        if (typeof pathOrSpec === 'string' && assertHandlers(handlers)) {
           register({
             method,
             path: pathOrSpec,
