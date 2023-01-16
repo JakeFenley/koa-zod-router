@@ -12,13 +12,16 @@
     "sourceMap": true,
     "outDir": "./dist",
     "typeRoots": ["src/@types"],
+    "skipLibCheck": true,
     "strict": true,
     "alwaysStrict": true,
     "isolatedModules": true,
     "strictNullChecks": true,
     "noImplicitOverride": true,
     "noImplicitReturns": true,
-    "noImplicitThis": true
+    "noImplicitThis": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true
   },
   "exclude": ["node_modules", "dist"]
 }

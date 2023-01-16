@@ -3,14 +3,15 @@
   "version": "0.9.11",
   "description": "",
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "type": "commonjs",
   "scripts": {
-    "build": "rm -rf dist && tsc --build tsconfig.build.json",
-    "example": "ts-node-dev examples/index.ts",
+    "build": "rm -rf dist && tsup src/index.ts --format cjs,esm --dts",
+    "example": "tsup examples/index.ts --watch",
     "test": "mocha",
     "test:coverage": "nyc --reporter=text mocha",
-    "lint": "eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\""
+    "lint": "tsc && eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\""
   },
   "author": {
     "name": "Jake Fenley",
@@ -24,6 +25,7 @@
     "zod": "^3.20.2"
   },
   "devDependencies": {
+    "@changesets/cli": "^2.26.0",
     "@types/formidable": "^2.0.5",
     "@types/koa": "^2.13.5",
     "@types/koa-bodyparser": "^4.3.10",
@@ -45,7 +47,7 @@
     "sinon": "^15.0.1",
     "supertest": "^6.3.3",
     "ts-node": "^10.9.1",
-    "ts-node-dev": "^2.0.0",
+    "tsup": "^6.5.0",
     "typescript": "^4.9.4"
   },
   "peerDependencies": {
