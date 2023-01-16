@@ -7,6 +7,7 @@ specifiers:
   '@types/koa-bodyparser': ^4.3.10
   '@types/koa__router': ^12.0.0
   '@types/node': ^18.11.18
+  '@types/sinon': ^10.0.13
   '@types/supertest': ^2.0.12
   '@typescript-eslint/eslint-plugin': ^5.48.1
   '@typescript-eslint/parser': ^5.48.1
@@ -40,6 +41,7 @@ devDependencies:
   '@types/koa-bodyparser': 4.3.10
   '@types/koa__router': 12.0.0
   '@types/node': 18.11.18
+  '@types/sinon': 10.0.13
   '@types/supertest': 2.0.12
   '@typescript-eslint/eslint-plugin': 5.48.1_3jon24igvnqaqexgwtxk6nkpse
   '@typescript-eslint/parser': 5.48.1_iukboom6ndih5an6iafl45j2fe
@@ -566,6 +568,16 @@ packages:
     dependencies:
       '@types/mime': 3.0.1
       '@types/node': 18.11.18
+    dev: true
+
+  /@types/sinon/10.0.13:
+    resolution: {integrity: sha512-UVjDqJblVNQYvVNUsj0PuYYw0ELRmgt1Nt5Vk0pT5f16ROGfcKJY8o1HVuMOJOpD727RrGB9EGvoaTQE5tgxZQ==}
+    dependencies:
+      '@types/sinonjs__fake-timers': 8.1.2
+    dev: true
+
+  /@types/sinonjs__fake-timers/8.1.2:
+    resolution: {integrity: sha512-9GcLXF0/v3t80caGs5p2rRfkB+a8VBGLJZVih6CNFkx8IZ994wiKKLSRs9nuFwk1HevWs/1mnUmkApGrSGsShA==}
     dev: true
 
   /@types/strip-bom/3.0.0:

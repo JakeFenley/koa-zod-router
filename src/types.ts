@@ -96,6 +96,7 @@ export interface RouterOpts {
   formidableOpts?: formidable.Options;
   koaRouterOpts?: RouterOptions;
   zodRouterOpts?: {
+    enableMultipart?: boolean;
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;
   };

@@ -1,5 +1,5 @@
 import { DefaultContext, Next } from 'koa';
-import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodType, ZodTypeAny, ZodTypeDef } from 'zod';
+import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodTypeAny } from 'zod';
 import { ValidationOptions, RouterOpts } from './types';
 import { assertValidation, noopMiddleware } from './util';
 

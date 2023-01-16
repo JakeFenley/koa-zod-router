@@ -9,7 +9,10 @@ import { multipartParserMiddleware } from './multipart-parser-middleware';
 const zodRouter = (opts?: RouterOpts) => {
   const _router = new KoaRouter(opts?.koaRouterOpts);
   _router.use(bodyParser(opts?.bodyParserOpts));
-  _router.use(multipartParserMiddleware(opts?.formidableOpts));
+
+  if (opts?.zodRouterOpts?.enableMultipart) {
+    _router.use(multipartParserMiddleware(opts?.formidableOpts));
+  }
 
   // Delegated methods - preserves value of 'this' in KoaRouter
   function all() {

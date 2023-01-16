@@ -8,15 +8,19 @@ export const multipartParserMiddleware = (options?: formidable.Options) => {
     }
 
     const form = formidable({ multiples: true, ...options });
-    form.parse(ctx.req, (error, fields, files) => {
-      if (error) {
-        ctx.throw(500);
-      }
 
-      ctx.request.body = fields;
-      ctx.request.files = files;
+    await new Promise<void>((resolve, reject) => {
+      form.parse(ctx.req, (err, fields, files) => {
+        if (err) {
+          reject(err);
+          return;
+        }
 
-      next();
+        ctx.request.body = fields;
+        ctx.request.files = files;
+        resolve();
+      });
     });
+    next();
   };
 };
