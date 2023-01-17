@@ -4,7 +4,7 @@
 
 ### Patch Changes
 
-- 244e59a: Update Docs
+- 244e59a: Update Docs, fix transform type inference
 
 ## 1.0.1
 
