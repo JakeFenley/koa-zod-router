@@ -1,6 +1,6 @@
 import assert from 'assert';
 import { describe, it } from 'node:test';
-import { methods, zFile } from '../src/util';
+import { createRouteSpec, methods, zFile } from '../src/util';
 import KoaRouter from '@koa/router';
 import zodRouter from '../src/zod-router';
 import { createApp, request } from './test-utils';
@@ -75,6 +75,41 @@ describe('zodRouter', () => {
         });
     });
 
+    it('register should throw when method is missing in spec', async () => {
+      const router = zodRouter();
+
+      const spec = createRouteSpec({
+        path: '/',
+        handler: () => {},
+      });
+
+      assert.throws(() => {
+        router.register(spec);
+      }, /HTTP Method missing in spec \//);
+    });
+
+    it('register should work as indended with createRouteSpec', async () => {
+      const router = zodRouter();
+
+      const spec = createRouteSpec({
+        method: 'get',
+        path: '/',
+        handler: (ctx) => {
+          ctx.body = { success: true };
+        },
+        validate: { response: z.object({ success: z.boolean() }) },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.body.success === true);
+        });
+    });
+
     it('http method functions work with path or route spec as first arg', async () => {
       const router = zodRouter();
 
@@ -113,6 +148,36 @@ describe('zodRouter', () => {
         // @ts-ignore
         router.get('/', 'str', () => {}, {});
       }, /Invalid route arguments/);
+    });
+
+    it('route method fn should retain http method called when method prop accidentally passed', async () => {
+      const router = zodRouter();
+
+      const spec = createRouteSpec({
+        method: 'post',
+        path: '/',
+        handler: (ctx) => {
+          ctx.body = 'hello';
+        },
+        validate: { response: z.string() },
+      });
+
+      router.get(spec);
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.text === 'hello');
+        });
+
+      await request(app)
+        .post('/')
+        .then((res) => {
+          assert(res.status === 404);
+        });
     });
   });
 

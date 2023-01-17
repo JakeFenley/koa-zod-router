@@ -79,11 +79,7 @@ const zodRouter = (opts?: RouterOpts) => {
    *   name: 'post-example',
    *   method: 'post',
    *   path: '/post/:id',
-   *   pre: async (ctx, next) => {
-   *     //... pre-handler
-   *     await next();
-   *   },
-   *   handler: [
+   *   handler:
    *     async (ctx, next) => {
    *       const { foo } = ctx.request.body;
    *       const { bar } = ctx.request.query;
@@ -92,16 +88,13 @@ const zodRouter = (opts?: RouterOpts) => {
    *       ctx.body = { hello: 'world' };
    *       await next();
    *     },
-   *   ],
+   *
    *   validate: {
    *     body: z.object({ foo: z.number() }),
    *     params: z.object({ id: z.coerce.number() }),
    *     query: z.object({ bar: z.string() }),
    *     headers: z.object({ 'x-test-header': z.string() }),
    *     response: z.object({ hello: z.string() }),
-   *     files: z.object({
-   *       some_file: zFile(),
-   *     }),
    *   },
    * });
    * ```

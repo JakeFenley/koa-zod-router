@@ -71,22 +71,6 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
   return false;
 };
 
-export const assertStandardSpec = <H, P, Q, B, F, R>(val: any): val is Spec<H, P, Q, B, F, R> => {
-  if (!val?.method && !val?.opts) {
-    return true;
-  }
-
-  return false;
-};
-
-export const assertRegisterSpec = <H, P, Q, B, F, R>(val: any): val is RegisterSpec<H, P, Q, B, F, R> => {
-  if (val?.method || val?.opts) {
-    return true;
-  }
-
-  return false;
-};
-
 export const createRouteSpec = <
   Headers = ZodSchema,
   Params = ZodSchema,
