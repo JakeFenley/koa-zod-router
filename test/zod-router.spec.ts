@@ -100,6 +100,8 @@ describe('zodRouter', () => {
         validate: { response: z.object({ success: z.boolean() }) },
       });
 
+      router.register(spec);
+
       const app = createApp(router);
 
       await request(app)
@@ -528,6 +530,56 @@ describe('zodRouter', () => {
         .then((res) => {
           assert(res.body?.test === undefined);
           assert(res.status === 400);
+        });
+    });
+
+    it('middleware copies coerced values from z.parse correctly', async () => {
+      const router = zodRouter();
+
+      router.register({
+        path: '/',
+        method: 'post',
+        handler: (ctx) => {
+          ctx.body = {
+            date: ctx.request.query.date.toISOString(),
+            nested_date: ctx.request.body.depth_1.depth_2.date.toDateString(),
+          };
+        },
+        validate: {
+          body: z.object({
+            depth_1: z.object({
+              depth_2: z.object({
+                date: z.coerce.date(),
+              }),
+            }),
+          }),
+          query: z.object({
+            date: z.coerce.date(),
+          }),
+          response: z.object({
+            nested_date: z.string(),
+            date: z.string(),
+          }),
+        },
+      });
+
+      const app = createApp(router);
+
+      const queryDate = new Date().toISOString();
+      const bodyDate = new Date().toDateString();
+
+      await request(app)
+        .post(`/?date=${queryDate}`)
+        .send({
+          depth_1: {
+            depth_2: {
+              date: bodyDate,
+            },
+          },
+        })
+        .then((res) => {
+          assert(res.body.nested_date === bodyDate);
+          assert(res.body.date === queryDate);
         });
     });
   });
