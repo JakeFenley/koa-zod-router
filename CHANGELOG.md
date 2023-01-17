@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.0.2
+
+### Patch Changes
+
+- 244e59a: Update Docs
+
 ## 1.0.1
 
 ### Patch Changes
