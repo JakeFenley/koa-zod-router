@@ -11,15 +11,20 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 [formidable]: https://github.com/node-formidable/formidable
 [@koa/router]: https://github.com/koajs/router
 
-#### Features:
+## Features:
 
-- input/output validation using [zod][]
-- body parsing using [koa-bodyparser][]
-- multipart parsing using [formidable][]
-- wraps [@koa/router][], providing the same API but with typesafety and validation.
+- Input/output validation using [zod][]
+- Body parsing using [koa-bodyparser][]
+- Multipart parsing using [formidable][]
+- Wraps [@koa/router][], providing the same API but with typesafety and validation.
 
+## Quickstart
 
-#### Example
+```sh
+npm install koa-zod-router
+```
+
+index.ts:
 
 ```js
 import Koa from 'koa';
