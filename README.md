@@ -1,4 +1,4 @@
-# koa-zod-router
+# ⚡ koa-zod-router ⚡
 
 Inspired by koa-joi-router, this package aims to provide a similar feature-set while leveraging Zod and Typescript to create a fantastic dev experience.
 
@@ -10,59 +10,114 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 [koa-bodyparser]: https://github.com/koajs/bodyparser
 [formidable]: https://github.com/node-formidable/formidable
 [@koa/router]: https://github.com/koajs/router
+## 🔥 Features:
 
-## Features:
-
-- Input/output validation using [zod][]
+- Input/output validation and typesafety using [zod][]
 - Body parsing using [koa-bodyparser][]
 - Multipart parsing using [formidable][]
 - Wraps [@koa/router][], providing the same API but with typesafety and validation.
+- CJS and ESM support
 
-## Quickstart
+## 🚀 Install
 
 ```sh
 npm install koa-zod-router
 ```
 
-index.ts:
+## 🚦 Quickstart
+
+`index.ts:`
 
 ```js
 import Koa from 'koa';
-import { zFile } from '../src/util';
+import zodRouter from 'koa-zod-router';
 import { z } from 'zod';
-import zodRouter from '../src/zod-router';
 
 const app = new Koa();
 
 const router = zodRouter();
 
 router.register({
-  name: 'post-example',
+  name: 'example',
   method: 'post',
   path: '/post/:id',
-  pre: async (ctx, next) => {
-    //... pre-handler
+  handler: async (ctx, next) => {
+    const { foo } = ctx.request.body;
+    ctx.body = { hello: 'world' };
+
     await next();
   },
-  handlers: [
-    async (ctx, next) => {
-      const { foo } = ctx.request.body;
-      const { bar } = ctx.request.query;
-      const { id } = ctx.request.params;
-      ctx.request.headers['x-test-header'];
-      ctx.body = { hello: 'world' };
-
-      await next();
-    },
-  ],
   validate: {
-    body: z.object({ foo: z.number() }),
     params: z.object({ id: z.coerce.number() }),
-    query: z.object({ bar: z.string() }),
-    headers: z.object({ 'x-test-header': z.string() }),
+    body: z.object({ foo: z.number() }),
     response: z.object({ hello: z.string() }),
   },
 });
+
+app.use(router.routes());
+
+app.listen(3000, () => {
+  console.log('app listening on http://localhost:3000');
+});
+```
+
+### 🛠️ Options
+
+| Param        | Type                | Description                                                                              |
+| ------------ | ------------------- | ---------------------------------------------------------------------------------------- |
+| [bodyParser] | <code>Object</code> | koa-bodyparser [options](https://github.com/koajs/bodyparser#options)                    |
+| [formidable] | <code>Object</code> | formidable [options](https://github.com/node-formidable/formidable#options)              |
+| [koaRouter]  | <code>Object</code> | @koa/router [options](https://github.com/koajs/router/blob/master/API.md#new-routeropts) |
+| [zodRouter]  | <code>Object</code> | koa-zod-router [options](#⚙️-zodrouter-options)                                                                   |
+
+#### ⚙️ zodRouter options
+
+| Param                  | Type                 | Description                                               |
+| ---------------------- | -------------------- | --------------------------------------------------------- |
+| [enableMultipart]      | <code>Boolean</code> | Enable Multipart parser middleware, used for file uploads |
+| [exposeRequestErrors]  | <code>Boolean</code> | Send ZodErrors caused by client in response body          |
+| [exposeResponseErrors] | <code>Boolean</code> | Send ZodErrors caused by the server in response body      |
+
+### Import/Exporting routes
+
+Most likely you'll want to seperate your routes into seperate files, and register them somewhere else. To do this you can use the helper function createRouteSpec and specify the route's properties.
+
+`get-user.ts:`
+
+```js
+import { createRouteSpec } from '../src/util';
+import { z } from 'zod';
+
+export const getUserRoute = createRouteSpec({
+  method: 'get',
+  path: '/user/:id',
+  handler: (ctx) => {
+    ctx.body = {
+      /* payload here */
+    };
+  },
+  validate: {
+    params: z.object({ id: z.coerce.number() }),
+    response: z.object({
+      /* validation here */
+    }),
+  },
+});
+```
+
+`index.ts:`
+
+```js
+import Koa from 'koa';
+import zodRouter from 'koa-zod-router';
+import { z } from 'zod';
+import { getUserRoute } from './get-user.ts';
+
+const app = new Koa();
+
+const router = zodRouter();
+
+router.register(getUserRoute);
 
 app.use(router.routes());
 

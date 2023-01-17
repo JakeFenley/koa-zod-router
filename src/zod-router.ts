@@ -1,4 +1,13 @@
-import { Method, RegisterSpec, Spec, ValidationOptions, RouterMethods, ZodMiddleware, RouterOpts } from './types';
+import {
+  Method,
+  RegisterSpec,
+  Spec,
+  ValidationOptions,
+  RouterMethods,
+  ZodMiddleware,
+  RouterOpts,
+  RouteSpec,
+} from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
 import { assertHandlers, methods, prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
@@ -70,11 +79,7 @@ const zodRouter = (opts?: RouterOpts) => {
    *   name: 'post-example',
    *   method: 'post',
    *   path: '/post/:id',
-   *   pre: async (ctx, next) => {
-   *     //... pre-handler
-   *     await next();
-   *   },
-   *   handlers: [
+   *   handler:
    *     async (ctx, next) => {
    *       const { foo } = ctx.request.body;
    *       const { bar } = ctx.request.query;
@@ -83,24 +88,23 @@ const zodRouter = (opts?: RouterOpts) => {
    *       ctx.body = { hello: 'world' };
    *       await next();
    *     },
-   *   ],
+   *
    *   validate: {
    *     body: z.object({ foo: z.number() }),
    *     params: z.object({ id: z.coerce.number() }),
    *     query: z.object({ bar: z.string() }),
    *     headers: z.object({ 'x-test-header': z.string() }),
    *     response: z.object({ hello: z.string() }),
-   *     files: z.object({
-   *       some_file: zFile(),
-   *     }),
    *   },
    * });
    * ```
    */
 
-  function register<H = unknown, P = unknown, Q = unknown, B = unknown, F = unknown, R = unknown>(
-    spec: RegisterSpec<H, P, Q, B, F, R>,
-  ) {
+  function register<H, P, Q, B, F, R>(spec: RegisterSpec<H, P, Q, B, F, R> | RouteSpec<H, P, Q, B, F, R>) {
+    if (!spec.method) {
+      throw new Error(`HTTP Method missing in spec ${spec.path}`);
+    }
+
     const methodsParam: string[] = Array.isArray(spec.method) ? spec.method : [spec.method];
 
     const name = spec.name ? spec.name : null;
@@ -109,7 +113,7 @@ const zodRouter = (opts?: RouterOpts) => {
       spec.path,
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
-      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handlers]),
+      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
       { name },
     );
 
@@ -120,14 +124,14 @@ const zodRouter = (opts?: RouterOpts) => {
     methods.reduce((acc: RouterMethods, method: Method) => {
       acc[method] = <H, P, Q, B, F, R>(
         pathOrSpec: string | Spec<H, P, Q, B, F, R>,
-        handlers?: ZodMiddleware<H, P, Q, B, F, R>,
+        handler?: ZodMiddleware<H, P, Q, B, F, R>,
         validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
       ) => {
-        if (typeof pathOrSpec === 'string' && assertHandlers(handlers)) {
+        if (typeof pathOrSpec === 'string' && assertHandlers(handler)) {
           register({
             method,
             path: pathOrSpec,
-            handlers,
+            handler,
             validate: validationOptions,
           });
 

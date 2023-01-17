@@ -1,7 +1,7 @@
 import Koa from 'koa';
-import { zFile } from '../src/util';
 import { z } from 'zod';
 import zodRouter from '../src/zod-router';
+import { getUserRoute } from './create-route-spec';
 
 const app = new Koa();
 
@@ -17,7 +17,7 @@ router.register({
     //... pre-handler
     await next();
   },
-  handlers: [
+  handler: [
     async (ctx, next) => {
       const { foo } = ctx.request.body;
       const { bar } = ctx.request.query;
@@ -36,6 +36,8 @@ router.register({
     response: z.object({ hello: z.string() }),
   },
 });
+
+router.register(getUserRoute);
 
 app.use(router.routes());
 
