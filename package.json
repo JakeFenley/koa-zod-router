@@ -20,7 +20,8 @@
   },
   "author": {
     "name": "Jake Fenley",
-    "url": "https://github.com/jakefenley"
+    "url": "https://github.com/jakefenley",
+    "email": "jakefdev@gmail.com"
   },
   "license": "MIT",
   "dependencies": {
