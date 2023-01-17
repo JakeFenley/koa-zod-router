@@ -10,6 +10,7 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 [koa-bodyparser]: https://github.com/koajs/bodyparser
 [formidable]: https://github.com/node-formidable/formidable
 [@koa/router]: https://github.com/koajs/router
+
 ## 🔥 Features:
 
 - Input/output validation and typesafety using [zod][]
@@ -63,20 +64,20 @@ app.listen(3000, () => {
 
 ### 🛠️ Options
 
-| Param        | Type                | Description                                                                              |
-| ------------ | ------------------- | ---------------------------------------------------------------------------------------- |
-| [bodyParser] | <code>Object</code> | koa-bodyparser [options](https://github.com/koajs/bodyparser#options)                    |
-| [formidable] | <code>Object</code> | formidable [options](https://github.com/node-formidable/formidable#options)              |
-| [koaRouter]  | <code>Object</code> | @koa/router [options](https://github.com/koajs/router/blob/master/API.md#new-routeropts) |
-| [zodRouter]  | <code>Object</code> | koa-zod-router [options](#⚙️-zodrouter-options)                                                                   |
+| Param      | Type                | Description                                                                              |
+| ---------- | ------------------- | ---------------------------------------------------------------------------------------- |
+| bodyParser | <code>Object</code> | koa-bodyparser [options](https://github.com/koajs/bodyparser#options)                    |
+| formidable | <code>Object</code> | formidable [options](https://github.com/node-formidable/formidable#options)              |
+| koaRouter  | <code>Object</code> | @koa/router [options](https://github.com/koajs/router/blob/master/API.md#new-routeropts) |
+| zodRouter  | <code>Object</code> | koa-zod-router [options](#⚙️-zodrouter-options)                                          |
 
 #### ⚙️ zodRouter options
 
-| Param                  | Type                 | Description                                               |
-| ---------------------- | -------------------- | --------------------------------------------------------- |
-| [enableMultipart]      | <code>Boolean</code> | Enable Multipart parser middleware, used for file uploads |
-| [exposeRequestErrors]  | <code>Boolean</code> | Send ZodErrors caused by client in response body          |
-| [exposeResponseErrors] | <code>Boolean</code> | Send ZodErrors caused by the server in response body      |
+| Param                | Type                 | Description                                               |
+| -------------------- | -------------------- | --------------------------------------------------------- |
+| enableMultipart      | <code>Boolean</code> | Enable Multipart parser middleware, used for file uploads |
+| exposeRequestErrors  | <code>Boolean</code> | Send ZodErrors caused by client in response body          |
+| exposeResponseErrors | <code>Boolean</code> | Send ZodErrors caused by the server in response body      |
 
 ### Import/Exporting routes
 
