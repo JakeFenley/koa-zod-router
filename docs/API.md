@@ -2,8 +2,6 @@
 
 ## zodRouter
 
-**Kind**: Function
-
 ### 🛠️ Options
 
 | Param        | Type                | Description                                                                              |
@@ -11,9 +9,9 @@
 | [bodyParser] | <code>Object</code> | koa-bodyparser [options](https://github.com/koajs/bodyparser#options)                    |
 | [formidable] | <code>Object</code> | formidable [options](https://github.com/node-formidable/formidable#options)              |
 | [koaRouter]  | <code>Object</code> | @koa/router [options](https://github.com/koajs/router/blob/master/API.md#new-routeropts) |
-| [zodRouter]  | <code>Object</code> | koa-zod-router [options](#zodrouter-options)                                             |
+| [zodRouter]  | <code>Object</code> | koa-zod-router [options](#koa-zod-router-options)                                        |
 
-#### zodRouter options
+### zodRouter opts
 
 | Param                  | Type                 | Default | Description                                               |
 | ---------------------- | -------------------- | ------- | --------------------------------------------------------- |
@@ -23,8 +21,7 @@
 
 Please see [@koa/router](https://github.com/koajs/router/blob/master/API.md) docs for any methods not mentioned in this doc. Only methods that have been wrapped or overridden are mentioned here. All other methods are delegated to koa-router.
 
-**Example**
-Basic usage:
+**Example**:
 
 ### zodRouter.get|put|post|patch|delete|del ⇒ <code>KoaRouter</code>
 
@@ -36,7 +33,7 @@ where **verb** is one of the HTTP verbs such as `router.get()` or `router.post()
 
 Additionally, `router.all()` can be used to match against all methods. However validation is currently not supported using this method.
 
-**Create a route using a spec object:**
+#### Create a route using a spec object:
 
 | Param        | Type                                | Description                                                                                                           |
 | ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -73,7 +70,7 @@ router
 
 ### zodRouter.register(spec) ⇒ <code>KoaRouter</code>
 
-**Create a route using a spec object:**
+#### Create a route using a spec object:
 
 | Param        | Type                                | Description                                                                                                           |
 | ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
@@ -157,7 +154,7 @@ const router = zodRouter();
 router.register(getUserRoute);
 ```
 
-## zFile ⇒ <code>z.ZodType<PersistentFile> | z.ZodType<VolatileFile></code>
+## zFile ⇒ <code>z.ZodType\<PersistentFile\> | z.ZodType\<VolatileFile\></code>
 
 Utility function for validating file instance objects returned from [formidable](https://github.com/node-formidable/formidable)
 

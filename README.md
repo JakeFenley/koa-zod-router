@@ -18,7 +18,6 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 - Body parsing using [koa-bodyparser][]
 - Multipart parsing using [formidable][]
 - Wraps [@koa/router][], providing the same API but with typesafety and validation.
-- Lightweight
 - CJS and ESM support
 
 ## 🚀 Install
@@ -105,7 +104,7 @@ router.register(getUserRoute);
 
 When dealing with route parameters and query strings the incoming data will be parsed as strings to begin with. From a validation standpoint this can potentially be painful to deal with when dealing with things like dates in javascript. Luckily [zod] has a built in [coercion] method attached to its primitive data types to solve this!
 
-`convert a route parameter to a number:`
+**convert a route parameter to a number:**
 
 ```js
 router.register({
@@ -149,6 +148,8 @@ router.register({
 koa-zod-router uses [formidable] for any requests received with the `Content-Type` header set to `multipart/*`. This functionality is disabled by default, to enable this functionality create an instance of zodRouter and pass in `{ zodRouter: { enableMultipart: true } }` as your config. Then to validate files utilize the helper function `zFile`.
 
 ```js
+import zodRouter, { zFile } from 'koa-zod-router';
+
 const fileRouter = zodRouter({ zodRouter: { enableMultipart: true } });
 
 fileRouter.register({
@@ -170,7 +171,7 @@ fileRouter.register({
 
 ## API Reference
 
-[reference](https://github.com/JakeFenley/koa-zod-router/tree/main/docs/API.md)
+[Reference](https://github.com/JakeFenley/koa-zod-router/tree/main/docs/API.md)
 
 ## Feedback
 
