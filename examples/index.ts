@@ -30,7 +30,7 @@ router.register({
   ],
   validate: {
     body: z.object({ foo: z.number() }),
-    params: z.object({ id: z.coerce.number() }),
+    params: z.object({ id: z.string().transform((id) => parseInt(id, 10)) }),
     query: z.object({ bar: z.string() }),
     headers: z.object({ 'x-test-header': z.string() }),
     response: z.object({ hello: z.string() }),

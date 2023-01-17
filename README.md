@@ -102,7 +102,7 @@ router.register(getUserRoute);
 
 ### Type coercion
 
-When dealing with route parameters and query strings the incoming data will be parsed as strings to begin with. From a validation standpoint this can potentially be painful to deal with when dealing with things like dates in javascript. Luckily [zod] has a built in [coercion] method attached to its primitive data types to solve this!
+When dealing with route parameters, query strings, and headers the incoming data will be parsed as strings to begin with. From a validation standpoint this can potentially be painful to deal with when dealing with things like `Date` in javascript. Luckily [zod] has a built in [coercion] method attached to its primitive data types to solve this!
 
 **convert a route parameter to a number:**
 
@@ -145,7 +145,9 @@ router.register({
 
 ### Dealing with files
 
-koa-zod-router uses [formidable] for any requests received with the `Content-Type` header set to `multipart/*`. This functionality is disabled by default, to enable this functionality create an instance of zodRouter and pass in `{ zodRouter: { enableMultipart: true } }` as your config. Then to validate files utilize the helper function `zFile`.
+koa-zod-router uses [formidable] for any requests received with the `Content-Type` header set to `multipart/*`. 
+
+This functionality is disabled by default, to enable this functionality create an instance of zodRouter and pass in `{ zodRouter: { enableMultipart: true } }` as your config. Then to validate files utilize the helper function `zFile`.
 
 ```js
 import zodRouter, { zFile } from 'koa-zod-router';

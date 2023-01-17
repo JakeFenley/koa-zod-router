@@ -1,6 +1,6 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { z, ZodSchema } from 'zod';
+import { z, ZodSchema, ZodType, ZodTypeAny } from 'zod';
 import { Method, RegisterSpec, RouteSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
@@ -72,12 +72,12 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
 };
 
 export const createRouteSpec = <
-  Headers = ZodSchema,
-  Params = ZodSchema,
-  Query = ZodSchema,
-  Body = ZodSchema,
-  Files = ZodSchema,
-  Response = ZodSchema,
+  Headers = ZodTypeAny,
+  Params = ZodTypeAny,
+  Query = ZodTypeAny,
+  Body = ZodTypeAny,
+  Files = ZodTypeAny,
+  Response = ZodTypeAny,
 >(
   spec: RouteSpec<Headers, Params, Query, Body, Files, Response>,
 ): RouteSpec<Headers, Params, Query, Body, Files, Response> => {
