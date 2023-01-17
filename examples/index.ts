@@ -9,29 +9,10 @@ const router = zodRouter({
   zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true, enableMultipart: true },
 });
 
-router.post(
-  '/hello/:id',
-  async (ctx, next) => {
-    const { foo } = ctx.request.body;
-    const { bar } = ctx.request.query;
-    const { id } = ctx.request.params;
-    ctx.request.headers['x-test-header'];
-    ctx.body = { success: true };
-    await next();
-  },
-  {
-    body: z.object({ foo: z.number() }),
-    query: z.object({ bar: z.string() }),
-    params: z.object({ id: z.string() }),
-    headers: z.object({ 'x-test-header': z.string() }),
-    response: z.object({ success: z.boolean() }),
-  },
-);
-
 router.register({
   name: 'post-example',
   method: 'post',
-  path: '/post',
+  path: '/post/:id',
   pre: async (ctx, next) => {
     //... pre-handler
     await next();
@@ -41,7 +22,6 @@ router.register({
       const { foo } = ctx.request.body;
       const { bar } = ctx.request.query;
       const { id } = ctx.request.params;
-      const { test_file } = ctx.request.files;
       ctx.request.headers['x-test-header'];
       ctx.body = { hello: 'world' };
 
@@ -54,9 +34,6 @@ router.register({
     query: z.object({ bar: z.string() }),
     headers: z.object({ 'x-test-header': z.string() }),
     response: z.object({ hello: z.string() }),
-    files: z.object({
-      test_file: zFile(),
-    }),
   },
 });
 
