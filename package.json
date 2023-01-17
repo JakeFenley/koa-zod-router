@@ -1,6 +1,6 @@
 {
   "name": "koa-zod-router",
-  "version": "0.9.14",
+  "version": "1.0.0",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
