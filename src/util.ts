@@ -1,7 +1,7 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { z } from 'zod';
-import { Method, ValidationOptions, ZodContext, ZodMiddleware } from './types';
+import { z, ZodSchema } from 'zod';
+import { Method, RegisterSpec, RouteSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
 function flatten<H, P, Q, B, F, R>(
@@ -69,6 +69,35 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
   }
 
   return false;
+};
+
+export const assertStandardSpec = <H, P, Q, B, F, R>(val: any): val is Spec<H, P, Q, B, F, R> => {
+  if (!val?.method && !val?.opts) {
+    return true;
+  }
+
+  return false;
+};
+
+export const assertRegisterSpec = <H, P, Q, B, F, R>(val: any): val is RegisterSpec<H, P, Q, B, F, R> => {
+  if (val?.method || val?.opts) {
+    return true;
+  }
+
+  return false;
+};
+
+export const createRouteSpec = <
+  Headers = ZodSchema,
+  Params = ZodSchema,
+  Query = ZodSchema,
+  Body = ZodSchema,
+  Files = ZodSchema,
+  Response = ZodSchema,
+>(
+  spec: RouteSpec<Headers, Params, Query, Body, Files, Response>,
+): RouteSpec<Headers, Params, Query, Body, Files, Response> => {
+  return spec;
 };
 
 export const methods: Method[] = [

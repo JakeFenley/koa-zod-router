@@ -2,7 +2,7 @@ import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
 import formidable, { Files } from 'formidable';
 import { DefaultState, Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
-import z, { ZodSchema } from 'zod';
+import { ZodSchema } from 'zod';
 import zodRouter from './zod-router';
 
 export type Method =
@@ -41,8 +41,6 @@ export type Method =
   | 'unlock'
   | 'unsubscribe';
 
-export type InferedSchema<T> = z.infer<ZodSchema<T>>;
-
 export interface ZodContext<Headers, Params, Query, Body, Files> {
   request: {
     body: Body;
@@ -68,19 +66,23 @@ export type ZodMiddleware<H, P, Q, B, F, R> =
 export type Spec<H, P, Q, B, F, R> = {
   name?: string;
   path: string;
-  handlers: ZodMiddleware<H, P, Q, B, F, R>;
+  handler: ZodMiddleware<H, P, Q, B, F, R>;
   pre?: ZodMiddleware<H, P, Q, B, F, R>;
   validate?: ValidationOptions<H, P, Q, B, F, R>;
+  opts?: LayerOptions;
 };
 
 export type RegisterSpec<H, P, Q, B, F, R> = {
   method: Method | Method[];
-  opts?: LayerOptions;
+} & Spec<H, P, Q, B, F, R>;
+
+export type RouteSpec<H, P, Q, B, F, R> = {
+  method?: Method | Method[];
 } & Spec<H, P, Q, B, F, R>;
 
 declare function RouterMethodFn<H, P, Q, B, F, R>(
   path: string,
-  handlers: ZodMiddleware<H, P, Q, B, F, R>,
+  handler: ZodMiddleware<H, P, Q, B, F, R>,
   validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
 ): KoaRouter;
 declare function RouterMethodFn<H, P, Q, B, F, R>(spec: Spec<H, P, Q, B, F, R>): KoaRouter;

@@ -25,7 +25,7 @@ describe('zodRouter', () => {
         pre: async (ctx, next) => {
           await next();
         },
-        handlers: [
+        handler: [
           async (ctx, next) => {
             next();
           },
@@ -46,7 +46,7 @@ describe('zodRouter', () => {
       router.register({
         path: '/',
         method: ['patch', 'post'],
-        handlers: (ctx) => {
+        handler: (ctx) => {
           const { test } = ctx.request.body;
           ctx.body = { success: Boolean(test) };
         },
@@ -84,7 +84,7 @@ describe('zodRouter', () => {
 
       router.get({
         path: '/spec',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.body = { success: true };
         },
       });
@@ -138,7 +138,7 @@ describe('zodRouter', () => {
         method: 'get',
         path: '/test',
         name: 'example',
-        handlers: () => {},
+        handler: () => {},
       });
 
       assert(router.match('/test', 'get')?.path.find((route) => route.name === 'example'));
@@ -165,7 +165,7 @@ describe('zodRouter', () => {
         method: 'get',
         path: '/test',
         name: 'example',
-        handlers: () => {},
+        handler: () => {},
       });
 
       const route = router.route('example') as KoaRouter.Layer;
@@ -193,7 +193,7 @@ describe('zodRouter', () => {
       router.get({
         name: 'test',
         path: '/',
-        handlers: () => {},
+        handler: () => {},
       });
 
       assert(router.route('test'));
@@ -212,7 +212,7 @@ describe('zodRouter', () => {
       router.get({
         name: 'test',
         path: '/',
-        handlers: () => {},
+        handler: () => {},
       });
 
       // @ts-ignore
@@ -232,7 +232,7 @@ describe('zodRouter', () => {
       router.register({
         path: '/',
         method: 'get',
-        handlers: (ctx, next) => {
+        handler: (ctx, next) => {
           ctx.body = { hello: ctx.state.hello };
           next();
         },
@@ -251,7 +251,7 @@ describe('zodRouter', () => {
     it('url should use koa-router implementation correctly', () => {
       const router = zodRouter();
 
-      router.register({ name: 'users', method: 'get', path: '/users/:id', handlers: () => {} });
+      router.register({ name: 'users', method: 'get', path: '/users/:id', handler: () => {} });
 
       assert(router.url('users', 3) === '/users/3');
     });
@@ -306,7 +306,7 @@ describe('zodRouter', () => {
 
       router.get({
         path: '/',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.body = { test: ctx.request.query.test };
         },
         validate: {
@@ -337,7 +337,7 @@ describe('zodRouter', () => {
       router.register({
         method: 'post',
         path: '/',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.body = { test: ctx.request.body.test };
         },
         validate: {
@@ -371,7 +371,7 @@ describe('zodRouter', () => {
       router.register({
         method: 'get',
         path: '/test/:id/:sku',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.body = { id: ctx.request.params.id, sku: ctx.request.params.sku };
         },
         validate: {
@@ -405,7 +405,7 @@ describe('zodRouter', () => {
       router.register({
         method: 'patch',
         path: '/',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.body = { test: ctx.request.headers.test };
         },
         validate: {
@@ -438,7 +438,7 @@ describe('zodRouter', () => {
       router.register({
         method: 'patch',
         path: '/',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.body = { test: ctx.request.files.test.toJSON().originalFilename };
         },
         validate: {
@@ -537,7 +537,7 @@ describe('zodRouter', () => {
       router.register({
         path: '/test',
         method: 'put',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.status = 201;
           const { test_file } = ctx.request.files;
 
@@ -579,7 +579,7 @@ describe('zodRouter', () => {
       router.register({
         path: '/test',
         method: 'put',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.status = 201;
         },
       });
@@ -609,7 +609,7 @@ describe('zodRouter', () => {
       router.register({
         path: '/test',
         method: 'put',
-        handlers: (ctx) => {
+        handler: (ctx) => {
           ctx.status = 201;
         },
       });

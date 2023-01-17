@@ -1,7 +1,7 @@
 import Koa from 'koa';
-import { zFile } from '../src/util';
 import { z } from 'zod';
 import zodRouter from '../src/zod-router';
+import exportedRouter from './create-route-spec';
 
 const app = new Koa();
 
@@ -17,7 +17,7 @@ router.register({
     //... pre-handler
     await next();
   },
-  handlers: [
+  handler: [
     async (ctx, next) => {
       const { foo } = ctx.request.body;
       const { bar } = ctx.request.query;
@@ -38,6 +38,7 @@ router.register({
 });
 
 app.use(router.routes());
+app.use(exportedRouter.middleware());
 
 app.listen(3000, () => {
   console.log('app listening on http://localhost:3000');

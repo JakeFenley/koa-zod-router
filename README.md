@@ -44,7 +44,7 @@ router.register({
     //... pre-handler
     await next();
   },
-  handlers: [
+  handler: [
     async (ctx, next) => {
       const { foo } = ctx.request.body;
       const { bar } = ctx.request.query;

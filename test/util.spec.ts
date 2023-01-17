@@ -4,7 +4,7 @@ import { describe, it } from 'node:test';
 import { prepareMiddleware, assertValidation, assertHandlers, assertFormidableError } from '../src/util';
 
 describe('prepareMiddleware', () => {
-  it('should flatten array of handlers', () => {
+  it('should flatten array of handler', () => {
     const middlewares = prepareMiddleware([() => {}, [() => {}, () => {}], [() => {}, () => {}, () => {}], () => {}]);
 
     assert(middlewares.length === 7);
@@ -55,13 +55,13 @@ describe('assertValidation', () => {
 });
 
 describe('assertHandlers', () => {
-  it('should assert array of handlers to be true', () => {
+  it('should assert array of handler to be true', () => {
     const assertion = assertHandlers([() => {}, () => {}, () => {}]);
 
     assert(assertion);
   });
 
-  it('should assert array of handlers and strings to be false', () => {
+  it('should assert array of handler and strings to be false', () => {
     const assertionOne = assertHandlers([() => {}, () => {}, () => {}, 'str']);
 
     assert(!assertionOne);
