@@ -1,6 +1,5 @@
 import { createRouteSpec } from '../src/util';
 import { z } from 'zod';
-import zodRouter from '../src';
 
 export const getUserRoute = createRouteSpec({
   method: ['post', 'patch'],
@@ -14,9 +13,3 @@ export const getUserRoute = createRouteSpec({
     response: z.object({ success: z.boolean() }),
   },
 });
-
-const exportedRouter = zodRouter();
-
-exportedRouter.register(getUserRoute);
-
-export default exportedRouter;

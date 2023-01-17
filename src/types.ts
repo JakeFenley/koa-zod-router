@@ -1,5 +1,5 @@
 import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
-import formidable, { Files } from 'formidable';
+import formidable from 'formidable';
 import { DefaultState, Middleware } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import { ZodSchema } from 'zod';
