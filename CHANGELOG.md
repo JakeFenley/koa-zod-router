@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.0.3
+
+### Patch Changes
+
+- 5d879fd: Update peer dependencies
+
 ## 1.0.2
 
 ### Patch Changes
