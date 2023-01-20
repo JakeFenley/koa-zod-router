@@ -1,5 +1,6 @@
 import zodRouter from './zod-router';
-export type { RouterOpts, ZodRouter } from './types';
+export * from './types';
 export { createRouteSpec, zFile } from './util';
+export { zodRouter };
 
 export default zodRouter;
