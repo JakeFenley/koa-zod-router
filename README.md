@@ -100,6 +100,18 @@ const router = zodRouter();
 router.register(getUserRoute);
 ```
 
+### Exposing validation errors to the client
+
+By default validation errors will respond with either a generic 400 or 500 error depending on whether the validation fails from the sent fields in the request, or if there is an issue in the response body.
+
+To enable ZodErrors being exposed to the client simply use the following config:
+
+```js
+const router = zodRouter({
+  zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true },
+});
+```
+
 ### Type coercion
 
 When dealing with route parameters, query strings, and headers the incoming data will be parsed as strings to begin with. From a validation standpoint this can potentially be painful to deal with when dealing with things like `Date` in javascript. Luckily [zod] has a built in [coercion] method attached to its primitive data types to solve this!
@@ -177,8 +189,11 @@ fileRouter.register({
 
 ## Feedback
 
-Found a bug? Have a question or idea?
+Found a bug? 
 Please let me know in [Issues section](https://github.com/JakeFenley/koa-zod-router/issues).
+
+Have a question or idea?
+Please let me know in [Discussions section](https://github.com/JakeFenley/koa-zod-router/discussions).
 
 Found a vulnerability or other security issue?
 Please refer to [Security policy](https://github.com/JakeFenley/koa-zod-router/blob/main/SECURITY.md).

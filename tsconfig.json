@@ -3,6 +3,7 @@
     "baseUrl": ".",
     "lib": ["es2022"],
     "declaration": true,
+    "declarationMap": true,
     "rootDir": ".",
     "target": "ES2022",
     "module": "CommonJS",
