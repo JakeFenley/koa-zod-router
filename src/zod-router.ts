@@ -14,9 +14,10 @@ import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
 import { multipartParserMiddleware } from './multipart-parser-middleware';
+import { DefaultState } from 'koa';
 
-const zodRouter = (opts?: RouterOpts) => {
-  const _router = new KoaRouter(opts?.koaRouter);
+const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
+  const _router = new KoaRouter<State>(opts?.koaRouter);
   _router.use(bodyParser(opts?.bodyParser));
 
   if (opts?.zodRouter?.enableMultipart) {
@@ -100,7 +101,9 @@ const zodRouter = (opts?: RouterOpts) => {
    * ```
    */
 
-  function register<H, P, Q, B, F, R>(spec: RegisterSpec<H, P, Q, B, F, R> | RouteSpec<H, P, Q, B, F, R>) {
+  function register<H, P, Q, B, F, R>(
+    spec: RegisterSpec<State, H, P, Q, B, F, R> | RouteSpec<State, H, P, Q, B, F, R>,
+  ) {
     if (!spec.method) {
       throw new Error(`HTTP Method missing in spec ${spec.path}`);
     }
@@ -113,7 +116,7 @@ const zodRouter = (opts?: RouterOpts) => {
       spec.path,
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
-      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+      prepareMiddleware<State>([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
       { name },
     );
 
@@ -123,8 +126,8 @@ const zodRouter = (opts?: RouterOpts) => {
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
       acc[method] = <H, P, Q, B, F, R>(
-        pathOrSpec: string | Spec<H, P, Q, B, F, R>,
-        handler?: ZodMiddleware<H, P, Q, B, F, R>,
+        pathOrSpec: string | Spec<State, H, P, Q, B, F, R>,
+        handler?: ZodMiddleware<State, H, P, Q, B, F, R>,
         validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
       ) => {
         if (typeof pathOrSpec === 'string' && assertHandlers(handler)) {

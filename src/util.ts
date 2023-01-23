@@ -1,13 +1,13 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { z, ZodSchema, ZodType, ZodTypeAny } from 'zod';
-import { Method, RegisterSpec, RouteSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
+import { z, ZodTypeAny } from 'zod';
+import { Method, RouteSpec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
-function flatten<H, P, Q, B, F, R>(
-  middlewares: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
-): Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[] {
-  const flattened = middlewares.reduce((acc: Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[], curr) => {
+function flatten<S, H, P, Q, B, F, R>(
+  middlewares: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
+): Middleware<S, ZodContext<H, P, Q, B, F>, R>[] {
+  const flattened = middlewares.reduce((acc: Middleware<S, ZodContext<H, P, Q, B, F>, R>[], curr) => {
     if (!curr) {
       return acc;
     }
@@ -21,9 +21,9 @@ function flatten<H, P, Q, B, F, R>(
   return flattened;
 }
 
-export const prepareMiddleware = <H, P, Q, B, F, R>(
-  input: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
-): Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[] => {
+export const prepareMiddleware = <S, H, P, Q, B, F, R>(
+  input: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
+): Middleware<S, ZodContext<H, P, Q, B, F>, R>[] => {
   return flatten(input);
 };
 
@@ -45,7 +45,7 @@ export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationO
   return false;
 };
 
-export const assertHandlers = <H, P, Q, B, F, R>(val: any): val is ZodMiddleware<H, P, Q, B, F, R> => {
+export const assertHandlers = <S, H, P, Q, B, F, R>(val: any): val is ZodMiddleware<S, H, P, Q, B, F, R> => {
   if (Array.isArray(val)) {
     for (const fn of val) {
       if (typeof fn !== 'function') {
@@ -72,6 +72,7 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
 };
 
 export const createRouteSpec = <
+  State = DefaultState,
   Headers = ZodTypeAny,
   Params = ZodTypeAny,
   Query = ZodTypeAny,
@@ -79,8 +80,8 @@ export const createRouteSpec = <
   Files = ZodTypeAny,
   Response = ZodTypeAny,
 >(
-  spec: RouteSpec<Headers, Params, Query, Body, Files, Response>,
-): RouteSpec<Headers, Params, Query, Body, Files, Response> => {
+  spec: RouteSpec<State, Headers, Params, Query, Body, Files, Response>,
+): RouteSpec<State, Headers, Params, Query, Body, Files, Response> => {
   return spec;
 };
 

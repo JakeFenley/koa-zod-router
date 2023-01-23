@@ -5,7 +5,11 @@ import { getUserRoute } from './create-route-spec';
 
 const app = new Koa();
 
-const router = zodRouter({
+interface State {
+  hello: string;
+}
+
+const router = zodRouter<State>({
   zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true, enableMultipart: true },
 });
 
@@ -24,6 +28,7 @@ router.register({
       const { id } = ctx.request.params;
       ctx.request.headers['x-test-header'];
       ctx.body = { hello: 'world' };
+      ctx.state.hello;
 
       await next();
     },

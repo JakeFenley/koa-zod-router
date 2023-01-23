@@ -59,33 +59,34 @@ export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {
   response?: ZodSchema<Response, z.ZodTypeDef, any>;
 };
 
-export type ZodMiddleware<H, P, Q, B, F, R> =
-  | Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>
-  | Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[];
+export type ZodMiddleware<S, H, P, Q, B, F, R> =
+  | Middleware<S, ZodContext<H, P, Q, B, F>, R>
+  | Middleware<S, ZodContext<H, P, Q, B, F>, R>[];
 
-export type Spec<H, P, Q, B, F, R> = {
+export type Spec<S, H, P, Q, B, F, R> = {
   name?: string;
   path: string;
-  handler: ZodMiddleware<H, P, Q, B, F, R>;
-  pre?: ZodMiddleware<H, P, Q, B, F, R>;
+  handler: ZodMiddleware<S, H, P, Q, B, F, R>;
+  pre?: ZodMiddleware<S, H, P, Q, B, F, R>;
   validate?: ValidationOptions<H, P, Q, B, F, R>;
   opts?: LayerOptions;
 };
 
-export type RegisterSpec<H, P, Q, B, F, R> = {
+export type RegisterSpec<S, H, P, Q, B, F, R> = {
   method: Method | Method[];
-} & Spec<H, P, Q, B, F, R>;
+} & Spec<S, H, P, Q, B, F, R>;
 
-export type RouteSpec<H, P, Q, B, F, R> = {
+export type RouteSpec<S, H, P, Q, B, F, R> = {
   method?: Method | Method[];
-} & Spec<H, P, Q, B, F, R>;
+} & Spec<S, H, P, Q, B, F, R>;
 
-declare function RouterMethodFn<H, P, Q, B, F, R>(
+declare function RouterMethodFn<S, H, P, Q, B, F, R>(
   path: string,
-  handler: ZodMiddleware<H, P, Q, B, F, R>,
+  handler: ZodMiddleware<S, H, P, Q, B, F, R>,
   validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
 ): KoaRouter;
-declare function RouterMethodFn<H, P, Q, B, F, R>(spec: Spec<H, P, Q, B, F, R>): KoaRouter;
+
+declare function RouterMethodFn<S, H, P, Q, B, F, R>(spec: Spec<S, H, P, Q, B, F, R>): KoaRouter;
 
 export type RouterMethod = typeof RouterMethodFn;
 
