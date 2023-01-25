@@ -5,12 +5,15 @@ import { getUserRoute } from './create-route-spec';
 
 const app = new Koa();
 
-interface State {
-  hello: string;
-}
-
-const router = zodRouter<State>({
+const router = zodRouter({
   zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true, enableMultipart: true },
+});
+
+router.use<{ hello: string }>({
+  middleware: (ctx, next) => {
+    ctx.state.hello;
+    next();
+  },
 });
 
 router.register({
@@ -23,6 +26,7 @@ router.register({
   },
   handler: [
     async (ctx, next) => {
+      ctx.state.hello;
       const { foo } = ctx.request.body;
       const { bar } = ctx.request.query;
       const { id } = ctx.request.params;

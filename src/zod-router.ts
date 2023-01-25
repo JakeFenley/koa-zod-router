@@ -7,17 +7,19 @@ import {
   ZodMiddleware,
   RouterOpts,
   RouteSpec,
+  UseSpec,
 } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
-import { assertHandlers, methods, prepareMiddleware } from './util';
+import { assertHandlers, assertUseSpec, flatten, methods, prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
 import { multipartParserMiddleware } from './multipart-parser-middleware';
-import { DefaultState } from 'koa';
+import { DefaultContext, DefaultState } from 'koa';
+import { ZodTypeAny } from 'zod';
 
-const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
-  const _router = new KoaRouter<State>(opts?.koaRouter);
+const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
+  const _router = new KoaRouter<RouterState>(opts?.koaRouter);
   _router.use(bodyParser(opts?.bodyParser));
 
   if (opts?.zodRouter?.enableMultipart) {
@@ -62,12 +64,61 @@ const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
     return _router.routes();
   }
 
-  function use() {
-    return _router.use(...arguments);
-  }
-
   function url(name: string, params?: any, options?: KoaRouter.UrlOptionsQuery) {
     return _router.url(name, params, options);
+  }
+
+  /**
+   * Use given middleware.
+   *
+   * Middleware run in the order they are defined by `.use()`. They are invoked
+   * sequentially, requests start at the first middleware and work their way
+   * "down" the middleware stack.
+   */
+  function use<State = RouterState, Context = DefaultContext>(
+    ...middleware: Array<Router.Middleware<State, Context>>
+  ): Router<State, Context>;
+  /**
+   * Use given middleware.
+   *
+   * Middleware run in the order they are defined by `.use()`. They are invoked
+   * sequentially, requests start at the first middleware and work their way
+   * "down" the middleware stack.
+   */
+  function use<State = RouterState, Context = DefaultContext>(
+    path: string | string[] | RegExp,
+    ...middleware: Array<Router.Middleware<State, Context>>
+  ): Router<State, Context>;
+
+  /**
+   * Use given middleware.
+   *
+   * Middleware run in the order they are defined by `.use()`. They are invoked
+   * sequentially, requests start at the first middleware and work their way
+   * "down" the middleware stack.
+   */
+  function use<
+    RouterState,
+    Headers = ZodTypeAny,
+    Params = ZodTypeAny,
+    Query = ZodTypeAny,
+    Body = ZodTypeAny,
+    Files = ZodTypeAny,
+    Response = ZodTypeAny,
+  >(spec: UseSpec<RouterState, Headers, Params, Query, Body, Files, Response>): Router<RouterState>;
+
+  function use() {
+    if (assertUseSpec(arguments[0])) {
+      const spec = arguments[0];
+
+      if (spec.path) {
+        return _router.use(spec.path, spec.middleware);
+      } else {
+        return _router.use(spec.middleware);
+      }
+    }
+
+    return _router.use(...arguments);
   }
 
   /**
@@ -102,7 +153,7 @@ const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
    */
 
   function register<H, P, Q, B, F, R>(
-    spec: RegisterSpec<State, H, P, Q, B, F, R> | RouteSpec<State, H, P, Q, B, F, R>,
+    spec: RegisterSpec<RouterState, H, P, Q, B, F, R> | RouteSpec<RouterState, H, P, Q, B, F, R>,
   ) {
     if (!spec.method) {
       throw new Error(`HTTP Method missing in spec ${spec.path}`);
@@ -116,7 +167,7 @@ const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
       spec.path,
       methodsParam,
       // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
-      prepareMiddleware<State>([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+      prepareMiddleware<RouterState>([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
       { name },
     );
 
@@ -126,8 +177,8 @@ const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
       acc[method] = <H, P, Q, B, F, R>(
-        pathOrSpec: string | Spec<State, H, P, Q, B, F, R>,
-        handler?: ZodMiddleware<State, H, P, Q, B, F, R>,
+        pathOrSpec: string | Spec<RouterState, H, P, Q, B, F, R>,
+        handler?: ZodMiddleware<RouterState, H, P, Q, B, F, R>,
         validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
       ) => {
         if (typeof pathOrSpec === 'string' && assertHandlers(handler)) {
@@ -176,7 +227,7 @@ const zodRouter = <State = DefaultState>(opts?: RouterOpts) => {
     route: route as Router['route'],
     routes: routes as Router['routes'],
     stack: _router.stack,
-    use: use as Router['use'],
+    use,
     url: url as Router['url'],
   } as const;
 };

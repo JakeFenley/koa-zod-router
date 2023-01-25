@@ -1,12 +1,12 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z, ZodTypeAny } from 'zod';
-import { Method, RouteSpec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
+import { Method, RouteSpec, UseSpec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
-function flatten<S, H, P, Q, B, F, R>(
+export const flatten = <S, H, P, Q, B, F, R>(
   middlewares: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
-): Middleware<S, ZodContext<H, P, Q, B, F>, R>[] {
+): Middleware<S, ZodContext<H, P, Q, B, F>, R>[] => {
   const flattened = middlewares.reduce((acc: Middleware<S, ZodContext<H, P, Q, B, F>, R>[], curr) => {
     if (!curr) {
       return acc;
@@ -19,7 +19,7 @@ function flatten<S, H, P, Q, B, F, R>(
   }, []);
 
   return flattened;
-}
+};
 
 export const prepareMiddleware = <S, H, P, Q, B, F, R>(
   input: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
@@ -28,7 +28,7 @@ export const prepareMiddleware = <S, H, P, Q, B, F, R>(
 };
 
 export async function noopMiddleware(ctx: Context, next: Next) {
-  return await next();
+  return void next();
 }
 
 export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationOptions<H, P, Q, B, F, R> => {
@@ -57,6 +57,14 @@ export const assertHandlers = <S, H, P, Q, B, F, R>(val: any): val is ZodMiddlew
   }
 
   return true;
+};
+
+export const assertUseSpec = <S, H, P, Q, B, F, R>(val: any): val is UseSpec<S, H, P, Q, B, F, R> => {
+  if (typeof val === 'object' && val['middleware']) {
+    return true;
+  }
+
+  return false;
 };
 
 export const zFile = () => {

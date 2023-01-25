@@ -1,6 +1,6 @@
 import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
 import formidable from 'formidable';
-import { DefaultState, Middleware } from 'koa';
+import { Middleware, Response } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import z, { ZodSchema } from 'zod';
 import zodRouter from './zod-router';
@@ -50,6 +50,7 @@ export interface ZodContext<Headers, Params, Query, Body, Files> {
     files: Files;
   };
 }
+
 export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {
   headers?: ZodSchema<Headers, z.ZodTypeDef, any>;
   body?: ZodSchema<Body, z.ZodTypeDef, any>;
@@ -59,7 +60,7 @@ export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {
   response?: ZodSchema<Response, z.ZodTypeDef, any>;
 };
 
-export type ZodMiddleware<S, H, P, Q, B, F, R> =
+export type ZodMiddleware<S, H, P, Q, B, F, R = Response['ctx']> =
   | Middleware<S, ZodContext<H, P, Q, B, F>, R>
   | Middleware<S, ZodContext<H, P, Q, B, F>, R>[];
 
@@ -79,6 +80,12 @@ export type RegisterSpec<S, H, P, Q, B, F, R> = {
 export type RouteSpec<S, H, P, Q, B, F, R> = {
   method?: Method | Method[];
 } & Spec<S, H, P, Q, B, F, R>;
+
+export type UseSpec<S, H, P, Q, B, F, R> = {
+  middleware: ZodMiddleware<S, H, P, Q, B, F>;
+  path?: string;
+  validate?: ValidationOptions<H, P, Q, B, F, R>;
+};
 
 declare function RouterMethodFn<S, H, P, Q, B, F, R>(
   path: string,
