@@ -82,8 +82,9 @@ export type RouteSpec<S, H, P, Q, B, F, R> = {
 } & Spec<S, H, P, Q, B, F, R>;
 
 export type UseSpec<S, H, P, Q, B, F, R> = {
-  middleware: ZodMiddleware<S, H, P, Q, B, F>;
+  handler: ZodMiddleware<S, H, P, Q, B, F, R>;
   path?: string;
+  pre?: ZodMiddleware<S, H, P, Q, B, F, R>;
   validate?: ValidationOptions<H, P, Q, B, F, R>;
 };
 

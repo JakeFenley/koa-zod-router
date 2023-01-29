@@ -10,7 +10,7 @@ import {
   UseSpec,
 } from './types';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
-import { assertHandlers, assertUseSpec, flatten, methods, prepareMiddleware } from './util';
+import { assertHandlers, assertUseSpec, methods, prepareMiddleware } from './util';
 import bodyParser from 'koa-bodyparser';
 import Router from '@koa/router';
 import { validationMiddleware } from './validation-middleware';
@@ -88,7 +88,7 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
   function use<State = RouterState, Context = DefaultContext>(
     path: string | string[] | RegExp,
     ...middleware: Array<Router.Middleware<State, Context>>
-  ): Router<State, Context>;
+  ): Router;
 
   /**
    * Use given middleware.
@@ -98,23 +98,28 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
    * "down" the middleware stack.
    */
   function use<
-    RouterState,
+    State = RouterState,
     Headers = ZodTypeAny,
     Params = ZodTypeAny,
     Query = ZodTypeAny,
     Body = ZodTypeAny,
     Files = ZodTypeAny,
     Response = ZodTypeAny,
-  >(spec: UseSpec<RouterState, Headers, Params, Query, Body, Files, Response>): Router<RouterState>;
+  >(spec: UseSpec<State, Headers, Params, Query, Body, Files, Response>): Router;
 
   function use() {
     if (assertUseSpec(arguments[0])) {
       const spec = arguments[0];
 
       if (spec.path) {
-        return _router.use(spec.path, spec.middleware);
+        return _router.use(
+          spec.path,
+          ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+        );
       } else {
-        return _router.use(spec.middleware);
+        return _router.use(
+          ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+        );
       }
     }
 
@@ -166,8 +171,7 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
     _router.register(
       spec.path,
       methodsParam,
-      // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
-      prepareMiddleware<RouterState>([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
       { name },
     );
 

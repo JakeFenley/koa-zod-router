@@ -1,13 +1,13 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { z, ZodTypeAny } from 'zod';
+import { z } from 'zod';
 import { Method, RouteSpec, UseSpec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
 export const flatten = <S, H, P, Q, B, F, R>(
   middlewares: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
-): Middleware<S, ZodContext<H, P, Q, B, F>, R>[] => {
-  const flattened = middlewares.reduce((acc: Middleware<S, ZodContext<H, P, Q, B, F>, R>[], curr) => {
+): Middleware[] => {
+  const flattened = middlewares.reduce((acc: Middleware[], curr) => {
     if (!curr) {
       return acc;
     }
@@ -15,7 +15,7 @@ export const flatten = <S, H, P, Q, B, F, R>(
     if (Array.isArray(curr)) {
       return acc.concat(flatten(curr));
     }
-    return acc.concat(curr);
+    return acc.concat(curr as unknown as Middleware);
   }, []);
 
   return flattened;
@@ -23,7 +23,7 @@ export const flatten = <S, H, P, Q, B, F, R>(
 
 export const prepareMiddleware = <S, H, P, Q, B, F, R>(
   input: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
-): Middleware<S, ZodContext<H, P, Q, B, F>, R>[] => {
+): Middleware[] => {
   return flatten(input);
 };
 
@@ -60,7 +60,7 @@ export const assertHandlers = <S, H, P, Q, B, F, R>(val: any): val is ZodMiddlew
 };
 
 export const assertUseSpec = <S, H, P, Q, B, F, R>(val: any): val is UseSpec<S, H, P, Q, B, F, R> => {
-  if (typeof val === 'object' && val['middleware']) {
+  if (typeof val === 'object' && val['handler']) {
     return true;
   }
 
@@ -79,18 +79,29 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
   return false;
 };
 
-export const createRouteSpec = <
-  State = DefaultState,
-  Headers = ZodTypeAny,
-  Params = ZodTypeAny,
-  Query = ZodTypeAny,
-  Body = ZodTypeAny,
-  Files = ZodTypeAny,
-  Response = ZodTypeAny,
->(
-  spec: RouteSpec<State, Headers, Params, Query, Body, Files, Response>,
-): RouteSpec<State, Headers, Params, Query, Body, Files, Response> => {
+export const createRouteSpec = <State extends DefaultState, H, P, Q, B, F, R>(
+  spec: RouteSpec<State, H, P, Q, B, F, R>,
+): RouteSpec<State, H, P, Q, B, F, R> => {
   return spec;
+};
+
+export const createUseSpec = <S, H, P, Q, B, F, R>(
+  spec: UseSpec<S, H, P, Q, B, F, R>,
+): UseSpec<S, H, P, Q, B, F, R> => {
+  return spec;
+};
+
+export const routerSpecFactory = <State>() => {
+  const _createUseSpec = <H, P, Q, B, F, R>(spec: UseSpec<State, H, P, Q, B, F, R>) => {
+    return createUseSpec<State, H, P, Q, B, F, R>(spec);
+  };
+  const _createRouteSpec = <H, P, Q, B, F, R>(spec: RouteSpec<State, H, P, Q, B, F, R>) => {
+    return createRouteSpec<State, H, P, Q, B, F, R>(spec);
+  };
+  return {
+    createUseSpec: _createUseSpec,
+    createRouteSpec: _createRouteSpec,
+  };
 };
 
 export const methods: Method[] = [

@@ -1,14 +1,21 @@
-import { createRouteSpec } from '../src/util';
 import { z } from 'zod';
+import specFactory from './state-helper-example';
 
-export const getUserRoute = createRouteSpec({
+export const getUserRoute = specFactory.createRouteSpec({
   method: 'get',
-  path: '/users',
+  path: '/user',
   handler: (ctx) => {
-    ctx.body = { success: true };
-    ctx.state.hello;
+    const { user } = ctx.state;
+
+    ctx.body = { user };
   },
   validate: {
-    response: z.object({ success: z.boolean() }),
+    response: z.object({
+      user: z.object({
+        email: z.string(),
+        id: z.number(),
+        username: z.string(),
+      }),
+    }),
   },
 });
