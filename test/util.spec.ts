@@ -1,7 +1,17 @@
 import assert from 'assert';
 import formidable from 'formidable';
 import { describe, it } from 'node:test';
-import { prepareMiddleware, assertValidation, assertHandlers, assertFormidableError } from '../src/util';
+import {
+  prepareMiddleware,
+  assertValidation,
+  assertHandlers,
+  assertFormidableError,
+  assertPath,
+  assertUseSpec,
+  createUseSpec,
+  createRouteSpec,
+  routerSpecFactory,
+} from '../src/util';
 
 describe('prepareMiddleware', () => {
   it('should flatten array of handler', () => {
@@ -89,5 +99,57 @@ describe('assertFormidableError', () => {
   it('should assert Error instance to be false', () => {
     const assertion = assertFormidableError(new Error());
     assert(!assertion);
+  });
+
+  describe('assertPath', () => {
+    it('should assert RegExp to be true', () => {
+      assert(assertPath(/hello/));
+    });
+
+    it('should assert string to be true', () => {
+      assert(assertPath('test'));
+    });
+
+    it('should return false with anything else', () => {
+      assert(!assertPath(true));
+      assert(!assertPath([]));
+      assert(!assertPath({}));
+      assert(!assertPath(undefined));
+    });
+  });
+  describe('assertUseSpec', () => {
+    it('should assert spec ', () => {
+      assert(assertUseSpec({ handler: () => {} }));
+    });
+
+    it('should return false on paths ', () => {
+      assert(!assertUseSpec('test'));
+      assert(!assertUseSpec(/test/));
+    });
+  });
+
+  describe('createUseSpec', () => {
+    it('should return parameter passed', () => {
+      const spec = { handler: () => {} };
+      assert(createUseSpec(spec) === spec);
+    });
+  });
+
+  describe('createRouteSpec', () => {
+    it('should return parameter passed', () => {
+      const spec = { handler: () => {}, path: '/' };
+      assert(createRouteSpec(spec) === spec);
+    });
+  });
+
+  describe('routerSpecFactory', () => {
+    it('factories should return parameter passed', () => {
+      const useSpec = { handler: () => {}, path: '/' };
+      const routeSpec = { handler: () => {}, path: '/' };
+      const factory = routerSpecFactory();
+
+      assert(factory.createRouteSpec(routeSpec) === routeSpec);
+      assert(factory.createUseSpec(useSpec) === useSpec);
+    });
   });
 });

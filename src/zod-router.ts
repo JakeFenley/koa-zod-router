@@ -110,7 +110,7 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
     if (assertUseSpec(arguments[0])) {
       const spec = arguments[0];
 
-      if (spec.path) {
+      if (assertPath(spec.path)) {
         return _router.use(
           spec.path,
           ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),

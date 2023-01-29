@@ -83,7 +83,7 @@ export type RouteSpec<S, H, P, Q, B, F, R> = {
 
 export type UseSpec<S, H, P, Q, B, F, R> = {
   handler: ZodMiddleware<S, H, P, Q, B, F, R>;
-  path?: string | RegExp;
+  path?: string;
   pre?: ZodMiddleware<S, H, P, Q, B, F, R>;
   validate?: ValidationOptions<H, P, Q, B, F, R>;
 };
