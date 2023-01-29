@@ -1,7 +1,7 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z } from 'zod';
-import { Method, RouteSpec, UseSpec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
+import { Method, RouteSpec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
 export const flatten = <S, H, P, Q, B, F, R>(

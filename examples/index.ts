@@ -29,7 +29,6 @@ router.register({
       const { id } = ctx.request.params;
       ctx.request.headers['x-test-header'];
       ctx.body = { hello: 'world' };
-
       await next();
     },
   ],
