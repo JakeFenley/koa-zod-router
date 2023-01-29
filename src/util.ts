@@ -1,7 +1,7 @@
 import { PersistentFile, VolatileFile, errors } from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z } from 'zod';
-import { Method, RouteSpec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
+import { Method, RouteSpec, Spec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
 const { FormidableError } = errors;
 
 export const flatten = <S, H, P, Q, B, F, R>(
@@ -30,6 +30,18 @@ export const prepareMiddleware = <S, H, P, Q, B, F, R>(
 export async function noopMiddleware(ctx: Context, next: Next) {
   return void next();
 }
+
+export const assertPath = (val: any): val is string | RegExp => {
+  if (typeof val === 'string') {
+    return true;
+  }
+
+  if (val instanceof RegExp) {
+    return true;
+  }
+
+  return false;
+};
 
 export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationOptions<H, P, Q, B, F, R> => {
   const props = ['headers', 'body', 'query', 'params', 'files', 'response'];
@@ -61,6 +73,14 @@ export const assertHandlers = <S, H, P, Q, B, F, R>(val: any): val is ZodMiddlew
 
 export const assertUseSpec = <S, H, P, Q, B, F, R>(val: any): val is UseSpec<S, H, P, Q, B, F, R> => {
   if (typeof val === 'object' && val['handler']) {
+    return true;
+  }
+
+  return false;
+};
+
+export const assertRouteFnSpec = <S, H, P, Q, B, F, R>(val: any): val is Spec<S, H, P, Q, B, F, R> => {
+  if (typeof val === 'object' && val['handler'] && val['path']) {
     return true;
   }
 

@@ -66,7 +66,7 @@ export type ZodMiddleware<S, H, P, Q, B, F, R = Response['ctx']> =
 
 export type Spec<S, H, P, Q, B, F, R> = {
   name?: string;
-  path: string;
+  path: string | RegExp;
   handler: ZodMiddleware<S, H, P, Q, B, F, R>;
   pre?: ZodMiddleware<S, H, P, Q, B, F, R>;
   validate?: ValidationOptions<H, P, Q, B, F, R>;
@@ -83,13 +83,13 @@ export type RouteSpec<S, H, P, Q, B, F, R> = {
 
 export type UseSpec<S, H, P, Q, B, F, R> = {
   handler: ZodMiddleware<S, H, P, Q, B, F, R>;
-  path?: string;
+  path?: string | RegExp;
   pre?: ZodMiddleware<S, H, P, Q, B, F, R>;
   validate?: ValidationOptions<H, P, Q, B, F, R>;
 };
 
 declare function RouterMethodFn<S, H, P, Q, B, F, R>(
-  path: string,
+  path: string | RegExp,
   handler: ZodMiddleware<S, H, P, Q, B, F, R>,
   validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
 ): KoaRouter;
