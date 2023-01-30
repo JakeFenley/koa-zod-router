@@ -2,19 +2,24 @@ import Koa from 'koa';
 import { z } from 'zod';
 import zodRouter from '../src/zod-router';
 import { getUserRoute } from './create-route-spec';
+import { middlewareExample } from './create-use-spec';
+import { UserState } from './types';
 
 const app = new Koa();
 
-const router = zodRouter({
+const router = zodRouter<UserState>({
   zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true, enableMultipart: true },
 });
+
+router.use(middlewareExample);
+router.register(getUserRoute);
 
 router.register({
   name: 'post-example',
   method: 'post',
   path: '/post/:id',
   pre: async (ctx, next) => {
-    //... pre-handler
+    //... optional pre-validation-handler
     await next();
   },
   handler: [
@@ -24,7 +29,6 @@ router.register({
       const { id } = ctx.request.params;
       ctx.request.headers['x-test-header'];
       ctx.body = { hello: 'world' };
-
       await next();
     },
   ],
@@ -36,8 +40,6 @@ router.register({
     response: z.object({ hello: z.string() }),
   },
 });
-
-router.register(getUserRoute);
 
 app.use(router.routes());
 

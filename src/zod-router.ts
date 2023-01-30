@@ -1,3 +1,5 @@
+import bodyParser from 'koa-bodyparser';
+import KoaRouter, { ParamMiddleware } from '@koa/router';
 import {
   Method,
   RegisterSpec,
@@ -7,16 +9,16 @@ import {
   ZodMiddleware,
   RouterOpts,
   RouteSpec,
+  UseSpec,
 } from './types';
-import KoaRouter, { ParamMiddleware } from '@koa/router';
-import { assertHandlers, methods, prepareMiddleware } from './util';
-import bodyParser from 'koa-bodyparser';
-import Router from '@koa/router';
+import { assertHandlers, assertPath, assertRouteFnSpec, assertUseSpec, methods, prepareMiddleware } from './util';
 import { validationMiddleware } from './validation-middleware';
 import { multipartParserMiddleware } from './multipart-parser-middleware';
+import { DefaultContext, DefaultState } from 'koa';
+import { ZodTypeAny } from 'zod';
 
-const zodRouter = (opts?: RouterOpts) => {
-  const _router = new KoaRouter(opts?.koaRouter);
+const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
+  const _router = new KoaRouter<RouterState>(opts?.koaRouter);
   _router.use(bodyParser(opts?.bodyParser));
 
   if (opts?.zodRouter?.enableMultipart) {
@@ -61,12 +63,66 @@ const zodRouter = (opts?: RouterOpts) => {
     return _router.routes();
   }
 
-  function use() {
-    return _router.use(...arguments);
-  }
-
   function url(name: string, params?: any, options?: KoaRouter.UrlOptionsQuery) {
     return _router.url(name, params, options);
+  }
+
+  /**
+   * Use given middleware.
+   *
+   * Middleware run in the order they are defined by `.use()`. They are invoked
+   * sequentially, requests start at the first middleware and work their way
+   * "down" the middleware stack.
+   */
+  function use<State = RouterState, Context = DefaultContext>(
+    ...middleware: Array<KoaRouter.Middleware<State, Context>>
+  ): KoaRouter<State, Context>;
+  /**
+   * Use given middleware.
+   *
+   * Middleware run in the order they are defined by `.use()`. They are invoked
+   * sequentially, requests start at the first middleware and work their way
+   * "down" the middleware stack.
+   */
+  function use<State = RouterState, Context = DefaultContext>(
+    path: string | string[] | RegExp,
+    ...middleware: Array<KoaRouter.Middleware<State, Context>>
+  ): KoaRouter;
+
+  /**
+   * Use given middleware.
+   *
+   * Middleware run in the order they are defined by `.use()`. They are invoked
+   * sequentially, requests start at the first middleware and work their way
+   * "down" the middleware stack.
+   */
+  function use<
+    State = RouterState,
+    Headers = ZodTypeAny,
+    Params = ZodTypeAny,
+    Query = ZodTypeAny,
+    Body = ZodTypeAny,
+    Files = ZodTypeAny,
+    Response = ZodTypeAny,
+  >(spec: UseSpec<State, Headers, Params, Query, Body, Files, Response>): KoaRouter;
+
+  function use() {
+    if (assertUseSpec(arguments[0])) {
+      const spec = arguments[0];
+
+      if (assertPath(spec.path)) {
+        return _router.use(
+          spec.path,
+          ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+        );
+      } else {
+        return _router.use(
+          ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+        );
+      }
+    }
+
+    return _router.use(...arguments);
   }
 
   /**
@@ -100,7 +156,9 @@ const zodRouter = (opts?: RouterOpts) => {
    * ```
    */
 
-  function register<H, P, Q, B, F, R>(spec: RegisterSpec<H, P, Q, B, F, R> | RouteSpec<H, P, Q, B, F, R>) {
+  function register<H, P, Q, B, F, R>(
+    spec: RegisterSpec<RouterState, H, P, Q, B, F, R> | RouteSpec<RouterState, H, P, Q, B, F, R>,
+  ) {
     if (!spec.method) {
       throw new Error(`HTTP Method missing in spec ${spec.path}`);
     }
@@ -112,7 +170,6 @@ const zodRouter = (opts?: RouterOpts) => {
     _router.register(
       spec.path,
       methodsParam,
-      // @ts-ignore ignore global extension from @types/koa-bodyparser on Koa.Request['body']
       prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
       { name },
     );
@@ -123,11 +180,11 @@ const zodRouter = (opts?: RouterOpts) => {
   const makeRouteMethods = () =>
     methods.reduce((acc: RouterMethods, method: Method) => {
       acc[method] = <H, P, Q, B, F, R>(
-        pathOrSpec: string | Spec<H, P, Q, B, F, R>,
-        handler?: ZodMiddleware<H, P, Q, B, F, R>,
+        pathOrSpec: string | RegExp | Spec<RouterState, H, P, Q, B, F, R>,
+        handler?: ZodMiddleware<RouterState, H, P, Q, B, F, R>,
         validationOptions?: ValidationOptions<H, P, Q, B, F, R>,
       ) => {
-        if (typeof pathOrSpec === 'string' && assertHandlers(handler)) {
+        if (assertPath(pathOrSpec) && assertHandlers(handler)) {
           register({
             method,
             path: pathOrSpec,
@@ -138,7 +195,7 @@ const zodRouter = (opts?: RouterOpts) => {
           return _router;
         }
 
-        if (typeof pathOrSpec === 'object') {
+        if (assertRouteFnSpec<RouterState, H, P, Q, B, F, R>(pathOrSpec)) {
           register({
             ...pathOrSpec,
             method,
@@ -160,21 +217,21 @@ const zodRouter = (opts?: RouterOpts) => {
     },
     register,
     // Delegated methods - we preserve KoaRouter type definitions with assertions
-    all: all as Router['all'],
-    allowedMethods: allowedMethods as Router['allowedMethods'],
-    match: match as Router['match'],
-    methods: _router.methods as Router['methods'],
-    middleware: middleware as Router['middleware'],
+    all: all as KoaRouter['all'],
+    allowedMethods: allowedMethods as KoaRouter['allowedMethods'],
+    match: match as KoaRouter['match'],
+    methods: _router.methods as KoaRouter['methods'],
+    middleware: middleware as KoaRouter['middleware'],
     opts: _router.opts,
-    param: param as Router['param'],
+    param: param as KoaRouter['param'],
     params: _router.params,
-    prefix: prefix as Router['prefix'],
-    redirect: redirect as Router['redirect'],
-    route: route as Router['route'],
-    routes: routes as Router['routes'],
+    prefix: prefix as KoaRouter['prefix'],
+    redirect: redirect as KoaRouter['redirect'],
+    route: route as KoaRouter['route'],
+    routes: routes as KoaRouter['routes'],
     stack: _router.stack,
-    use: use as Router['use'],
-    url: url as Router['url'],
+    use,
+    url: url as KoaRouter['url'],
   } as const;
 };
 

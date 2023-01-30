@@ -181,6 +181,111 @@ describe('zodRouter', () => {
           assert(res.status === 404);
         });
     });
+
+    it('use should use koa-router implementation correctly', async () => {
+      const router = zodRouter();
+
+      router.use((ctx, next) => {
+        ctx.state.hello = 'hi';
+        next();
+      });
+
+      router.register({
+        path: '/',
+        method: 'get',
+        handler: (ctx, next) => {
+          ctx.body = { hello: ctx.state.hello };
+          next();
+        },
+        validate: { response: z.object({ hello: z.string() }) },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.body.hello === 'hi');
+        });
+    });
+
+    it('use with zod-router spec object passed', async () => {
+      const router = zodRouter();
+
+      router.use({
+        handler: async (ctx, next) => {
+          if (ctx.request.headers['x-session-token'] === 'test-token') {
+            ctx.state.hello = ctx.request.headers['x-session-token'];
+            await next();
+          }
+        },
+        validate: {
+          headers: z.object({ 'x-session-token': z.string() }),
+        },
+      });
+
+      router.use({
+        path: '/with-path',
+        handler: async (ctx, next) => {
+          if (ctx.request.headers['x-with-path'] === 'with-path') {
+            ctx.state.withPath = ctx.request.headers['x-with-path'];
+            await next();
+          }
+        },
+        validate: {
+          headers: z.object({ 'x-with-path': z.string() }),
+        },
+      });
+
+      router.register({
+        path: '/',
+        method: 'get',
+        handler: async (ctx, next) => {
+          ctx.body = { hello: ctx.state.hello };
+          await next();
+        },
+        validate: { response: z.object({ hello: z.string() }) },
+      });
+
+      router.register({
+        path: '/with-path',
+        method: 'get',
+        handler: async (ctx, next) => {
+          ctx.body = { withPath: ctx.state.withPath };
+          await next();
+        },
+        validate: { response: z.object({ withPath: z.string() }) },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .set('x-session-token', 'test-token')
+        .then((res) => {
+          assert(res.body.hello === 'test-token');
+        });
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.status === 400);
+        });
+
+      await request(app)
+        .get('/with-path')
+        .set('x-session-token', 'test-token')
+        .set('x-with-path', 'with-path')
+        .then((res) => {
+          assert(res.body.withPath === 'with-path');
+        });
+
+      await request(app)
+        .get('/with-path')
+        .then((res) => {
+          assert(res.status === 400);
+        });
+    });
   });
 
   describe('delegated methods', () => {
@@ -286,33 +391,6 @@ describe('zodRouter', () => {
       assert(router.routes().router.stack.length === 2);
       // @ts-ignore
       assert(koaRouter.routes().router.stack.length === 2);
-    });
-
-    it('use should use koa-router implementation correctly', async () => {
-      const router = zodRouter();
-
-      router.use((ctx, next) => {
-        ctx.state.hello = 'hi';
-        next();
-      });
-
-      router.register({
-        path: '/',
-        method: 'get',
-        handler: (ctx, next) => {
-          ctx.body = { hello: ctx.state.hello };
-          next();
-        },
-        validate: { response: z.object({ hello: z.string() }) },
-      });
-
-      const app = createApp(router);
-
-      await request(app)
-        .get('/')
-        .then((res) => {
-          assert(res.body.hello === 'hi');
-        });
     });
 
     it('url should use koa-router implementation correctly', () => {

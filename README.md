@@ -1,6 +1,6 @@
 # ⚡ koa-zod-router ⚡
 
-Inspired by koa-joi-router, this package aims to provide a similar feature-set while leveraging Zod and Typescript to create a fantastic dev experience.
+Inspired by koa-joi-router, this package aims to provide a similar feature-set while leveraging Zod and Typescript to create typesafe routes and middlewares with built in validation.
 
 ![npm release](https://img.shields.io/npm/v/koa-zod-router?label=latest)
 [![Coverage Status](https://coveralls.io/repos/github/JakeFenley/koa-zod-router/badge.svg?branch=main)](https://coveralls.io/github/JakeFenley/koa-zod-router?branch=main)
@@ -100,6 +100,87 @@ const router = zodRouter();
 router.register(getUserRoute);
 ```
 
+### Adding state to routes
+
+zodRouter accepts a type parameter for adding types to `ctx.state`, as well as providing a helper function used creating routes and middlewares with state types.
+
+`route-state.ts:`
+
+```js
+import { routerSpecFactory } from 'koa-zod-router';
+
+export type UserState = {
+  user: {
+    username: string;
+    email: string;
+    id: number;
+  };
+};
+
+export const specFactory = routerSpecFactory<User>();
+
+```
+
+`auth-middleware.ts:`
+
+```js
+import { z } from 'zod';
+import { specFactory } from './route-state';
+
+export const authMiddleware = specFactory.createUseSpec({
+  handler: async (ctx, next) => {
+    // ... validate the session token
+
+    // setting state is now typesafe
+    ctx.state.user = {
+      username: 'johndoe',
+      email: 'example@email.com',
+      id: 1,
+    };
+
+    await next();
+  },
+  validate: {
+    // validation fails if `x-session-token` is not set in the HTTP request headers
+    headers: z.object({ 'x-session-token': z.string() }),
+  },
+});
+```
+
+`get-user.ts:`
+
+```js
+import { z } from 'zod';
+import { specFactory } from './route-state';
+
+export const getUserRoute = specFactory.createRouteSpec({
+  method: 'get',
+  path: '/user/:id',
+  handler: (ctx) => {
+    //.. our route has access to the ctx.state.user types now
+    ctx.state.user
+  },
+  validate: {
+      /* validation here */
+    },
+  },
+);
+```
+
+`index.ts:`
+
+```js
+import zodRouter from 'koa-zod-router';
+import { UserState } from './router-state';
+import { authMiddleware } from './auth-middleware';
+import { getUserRoute } from './get-user';
+
+const router = zodRouter<UserState>();
+
+router.use(authMiddleware);
+router.register(getUserRoute);
+```
+
 ### Exposing validation errors to the client
 
 By default validation errors will respond with either a generic 400 or 500 error depending on whether the validation fails from the sent fields in the request, or if there is an issue in the response body.
@@ -157,7 +238,7 @@ router.register({
 
 ### Dealing with files
 
-koa-zod-router uses [formidable] for any requests received with the `Content-Type` header set to `multipart/*`. 
+koa-zod-router uses [formidable] for any requests received with the `Content-Type` header set to `multipart/*`.
 
 This functionality is disabled by default, to enable this functionality create an instance of zodRouter and pass in `{ zodRouter: { enableMultipart: true } }` as your config. Then to validate files utilize the helper function `zFile`.
 
@@ -189,7 +270,7 @@ fileRouter.register({
 
 ## Feedback
 
-Found a bug? 
+Found a bug?
 Please let me know in [Issues section](https://github.com/JakeFenley/koa-zod-router/issues).
 
 Have a question or idea?
