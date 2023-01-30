@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.1.1
+
+### Patch Changes
+
+- e98f5cd: Add github repository to package.json
+
 ## 1.1.0
 
 ### Minor Changes
