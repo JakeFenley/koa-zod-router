@@ -117,7 +117,7 @@ export type UserState = {
   };
 };
 
-export const specFactory = routerSpecFactory<User>();
+export const specFactory = routerSpecFactory<UserState>();
 
 ```
 
