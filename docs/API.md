@@ -35,13 +35,13 @@ Additionally, `router.all()` can be used to match against all methods. However v
 
 #### Create a route using a spec object:
 
-| Param        | Type                                | Description                                                                                                           |
-| ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| path         | <code>String</code>                 | route path                                                                                                            |
-| handler      | <code>function \| function[]</code> | handler function(s)                                                                                                   |
-| [name]       | <code>String</code>                 | route name                                                                                                            |
-| [opts]       | <code>Object</code>                 | [KoaRouter.LayerOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/koa__router/index.d.ts) |
-| [validation] | <code>Object</code>                 | [validation schema](#validation-schema)                                                                               |
+| Param      | Type                                | Description                                                                                                           |
+| ---------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| path       | <code>String</code>                 | route path                                                                                                            |
+| handler    | <code>function \| function[]</code> | handler function(s)                                                                                                   |
+| [name]     | <code>String</code>                 | route name                                                                                                            |
+| [opts]     | <code>Object</code>                 | [KoaRouter.LayerOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/koa__router/index.d.ts) |
+| [validate] | <code>Object</code>                 | [validation schema](#validation-schema)                                                                               |
 
 ```javascript
 router
@@ -72,14 +72,14 @@ router
 
 #### Create a route using a spec object:
 
-| Param        | Type                                | Description                                                                                                           |
-| ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| path         | <code>String</code>                 | route path                                                                                                            |
-| method       | <code>String \| String[]</code>     | HTTP verb(s)                                                                                                          |
-| handler      | <code>function \| function[]</code> | handler function(s)                                                                                                   |
-| [name]       | <code>String</code>                 | route name                                                                                                            |
-| [opts]       | <code>Object</code>                 | [KoaRouter.LayerOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/koa__router/index.d.ts) |
-| [validation] | <code>Object</code>                 | [validation schema](#validation-schema)                                                                               |
+| Param      | Type                                | Description                                                                                                           |
+| ---------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| path       | <code>String</code>                 | route path                                                                                                            |
+| method     | <code>String \| String[]</code>     | HTTP verb(s)                                                                                                          |
+| handler    | <code>function \| function[]</code> | handler function(s)                                                                                                   |
+| [name]     | <code>String</code>                 | route name                                                                                                            |
+| [opts]     | <code>Object</code>                 | [KoaRouter.LayerOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/koa__router/index.d.ts) |
+| [validate] | <code>Object</code>                 | [validation schema](#validation-schema)                                                                               |
 
 ```javascript
 router.register({
@@ -106,20 +106,46 @@ router.register({
 | [files]    | <code>Object</code> | zod validation for `ctx.request.files`                        |
 | [response] | <code>Object</code> | zod validation for setting `ctx.body` and `ctx.response.body` |
 
+### zodRouter.use(spec) ⇒ <code>KoaRouter</code>
+
+Use middleware with either [koa-router's implementation](https://github.com/ZijianHe/koa-router/blob/master/README.md#routerusepath-middleware--router) or optionally pass in a spec object for validation and type inference.
+
+| Param      | Type                                | Description                             |
+| ---------- | ----------------------------------- | --------------------------------------- |
+| handler    | <code>function \| function[]</code> | handler function(s)                     |
+| [path]     | <code>String</code>                 | middleware path                         |
+| [pre]      | <code>function \| function[]</code> | pre-validation handler function(s)      |
+| [validate] | <code>Object</code>                 | [validation schema](#validation-schema) |
+
+**Example**:
+
+```js
+router.use({
+  handler: async (ctx, next) => {
+    // ...
+    await next();
+  },
+  validate: {
+    //...
+  },
+});
+```
+
 ## createRouteSpec(spec) ⇒ <code>RouteSpec</code>
 
-Utility function used for Importing/Exporting routes with type inference.
+Utility function used for Importing/Exporting routes with type inference and validation.
 
-### Spec
+### RouteSpec
 
-| Param        | Type                                | Description                                                                                                           |
-| ------------ | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| path         | <code>String</code>                 | route path                                                                                                            |
-| handler      | <code>function \| function[]</code> | handler function(s)                                                                                                   |
-| [method]     | <code>String \| String[]</code>     | HTTP verb(s)                                                                                                          |
-| [name]       | <code>String</code>                 | route name                                                                                                            |
-| [opts]       | <code>Object</code>                 | [KoaRouter.LayerOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/koa__router/index.d.ts) |
-| [validation] | <code>Object</code>                 | [validation schema](#validation-schema)                                                                               |
+| Param      | Type                                | Description                                                                                                           |
+| ---------- | ----------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| path       | <code>String</code>                 | route path                                                                                                            |
+| handler    | <code>function \| function[]</code> | handler function(s)                                                                                                   |
+| [method]   | <code>String \| String[]</code>     | HTTP verb(s)                                                                                                          |
+| [pre]      | <code>function \| function[]</code> | pre-validation handler function(s)                                                                                    |
+| [name]     | <code>String</code>                 | route name                                                                                                            |
+| [opts]     | <code>Object</code>                 | [KoaRouter.LayerOptions](https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/koa__router/index.d.ts) |
+| [validate] | <code>Object</code>                 | [validation schema](#validation-schema)                                                                               |
 
 **Example:**
 
@@ -152,6 +178,103 @@ import { getUserRoute } from './get-user.ts';
 
 const router = zodRouter();
 router.register(getUserRoute);
+```
+
+## createUseSpec(spec) ⇒ <code>UseSpec</code>
+
+### UseSpec
+
+| Param      | Type                                | Description                             |
+| ---------- | ----------------------------------- | --------------------------------------- |
+| handler    | <code>function \| function[]</code> | handler function(s)                     |
+| [path]     | <code>String</code>                 | middleware path                         |
+| [pre]      | <code>function \| function[]</code> | pre-validation handler function(s)      |
+| [validate] | <code>Object</code>                 | [validation schema](#validation-schema) |
+
+Utility function used for importing/exporting middlewares with type inference and validation.
+
+**Example:**
+
+```js
+import { createUseSpec } from 'koa-zod-router';
+
+export const authMiddleware = createUseSpec({
+  handler: async (ctx, next) => {
+    // ... validate the session token
+
+    // setting state is now typesafe
+    ctx.state.user = {
+      username: 'johndoe',
+      email: 'example@email.com',
+      id: 1,
+    };
+
+    await next();
+  },
+  validate: {
+    // validation fails if `x-session-token` is not set in the HTTP request headers
+    headers: z.object({ 'x-session-token': z.string() }),
+  },
+});
+```
+
+`index.ts:`
+
+```js
+import zodRouter from 'koa-zod-router';
+import { authMiddleware } from './auth-middleware';
+
+const router = zodRouter();
+router.use(authMiddleware);
+```
+
+## routerSpecFactory<State> ⇒ <code>{ createUseSpec, createRouteSpec }<code>
+
+Utility function used for importing/exporting routes and middlewares with type parameter `State` passed onto `ctx.state`
+
+**Example**
+
+`route-state.ts:`
+
+```js
+import { routerSpecFactory } from 'koa-zod-router';
+
+export type UserState = {
+  user: {
+    username: string;
+    email: string;
+    id: number;
+  };
+};
+
+export const specFactory = routerSpecFactory<User>();
+
+```
+
+`auth-middleware.ts:`
+
+```js
+import { z } from 'zod';
+import { specFactory } from './route-state';
+
+export const authMiddleware = specFactory.createUseSpec({
+  handler: async (ctx, next) => {
+    // ... validate the session token
+
+    // setting state is now typesafe
+    ctx.state.user = {
+      username: 'johndoe',
+      email: 'example@email.com',
+      id: 1,
+    };
+
+    await next();
+  },
+  validate: {
+    // validation fails if `x-session-token` is not set in the HTTP request headers
+    headers: z.object({ 'x-session-token': z.string() }),
+  },
+});
 ```
 
 ## zFile ⇒ <code>z.ZodType\<PersistentFile\> | z.ZodType\<VolatileFile\></code>

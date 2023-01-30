@@ -17,7 +17,8 @@ const parsedSuccessful = <Input, Output>(
 
 const validate = async <T>(
   data: unknown,
-  schema?: ZodTypeAny,
+  schema: ZodTypeAny | undefined,
+  name: string,
 ): Promise<ZodError<T> | Record<string, any> | undefined> => {
   if (!schema) {
     return undefined;
@@ -25,6 +26,7 @@ const validate = async <T>(
 
   const parsed = await schema.safeParseAsync(data);
   if (!parsedSuccessful(parsed)) {
+    parsed.error.name = `${parsed.error.name}: ${name}`;
     return parsed.error;
   }
 
@@ -44,11 +46,11 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     let inputErrors: ZodError[] = [];
 
     const [headers, params, query, body, files] = await Promise.all([
-      validate(ctx.request.headers, validation.headers),
-      validate(ctx.request.params, validation.params),
-      validate(ctx.request.query, validation.query),
-      validate(ctx.request.body, validation.body),
-      validate(ctx.request.files, validation.files),
+      validate(ctx.request.headers, validation.headers, 'Headers'),
+      validate(ctx.request.params, validation.params, 'Route parameters'),
+      validate(ctx.request.query, validation.query, 'Querystring'),
+      validate(ctx.request.body, validation.body, 'Request Body'),
+      validate(ctx.request.files, validation.files, 'Files'),
     ]);
 
     if (headers) {
@@ -102,13 +104,13 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     }
 
     if (inputErrors.length && opts?.exposeRequestErrors) {
-      ctx.status = 400;
+      ctx.response.status = 400;
       ctx.type = 'json';
       ctx.body = { error: inputErrors };
       ctx.app.emit('error', new ValidationError({ inputErrors }), ctx);
+
       return;
     }
-
     if (inputErrors.length) {
       ctx.throw(400, 'VALIDATION_ERROR');
     }
@@ -116,7 +118,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     await next();
 
     // Output validation
-    const output = await validate(ctx.body, validation.response);
+    const output = await validate(ctx.body, validation.response, 'Response');
 
     if (!output) {
       return;

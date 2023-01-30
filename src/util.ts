@@ -1,13 +1,13 @@
-import { PersistentFile, VolatileFile, errors } from 'formidable';
+import formidable from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { z, ZodSchema, ZodType, ZodTypeAny } from 'zod';
-import { Method, RegisterSpec, RouteSpec, Spec, ValidationOptions, ZodContext, ZodMiddleware } from './types';
-const { FormidableError } = errors;
+import { z } from 'zod';
+import { Method, RouteSpec, Spec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
+const { FormidableError } = formidable.errors;
 
-function flatten<H, P, Q, B, F, R>(
-  middlewares: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
-): Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[] {
-  const flattened = middlewares.reduce((acc: Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[], curr) => {
+export const flatten = <S, H, P, Q, B, F, R>(
+  middlewares: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
+): Middleware[] => {
+  const flattened = middlewares.reduce((acc: Middleware[], curr) => {
     if (!curr) {
       return acc;
     }
@@ -15,21 +15,33 @@ function flatten<H, P, Q, B, F, R>(
     if (Array.isArray(curr)) {
       return acc.concat(flatten(curr));
     }
-    return acc.concat(curr);
+    return acc.concat(curr as unknown as Middleware);
   }, []);
 
   return flattened;
-}
+};
 
-export const prepareMiddleware = <H, P, Q, B, F, R>(
-  input: Array<ZodMiddleware<H, P, Q, B, F, R> | undefined>,
-): Middleware<DefaultState, ZodContext<H, P, Q, B, F>, R>[] => {
+export const prepareMiddleware = <S, H, P, Q, B, F, R>(
+  input: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
+): Middleware[] => {
   return flatten(input);
 };
 
 export async function noopMiddleware(ctx: Context, next: Next) {
-  return await next();
+  return void next();
 }
+
+export const assertPath = (val: any): val is string | RegExp => {
+  if (typeof val === 'string') {
+    return true;
+  }
+
+  if (val instanceof RegExp) {
+    return true;
+  }
+
+  return false;
+};
 
 export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationOptions<H, P, Q, B, F, R> => {
   const props = ['headers', 'body', 'query', 'params', 'files', 'response'];
@@ -45,7 +57,7 @@ export const assertValidation = <H, P, Q, B, F, R>(val: any): val is ValidationO
   return false;
 };
 
-export const assertHandlers = <H, P, Q, B, F, R>(val: any): val is ZodMiddleware<H, P, Q, B, F, R> => {
+export const assertHandlers = <S, H, P, Q, B, F, R>(val: any): val is ZodMiddleware<S, H, P, Q, B, F, R> => {
   if (Array.isArray(val)) {
     for (const fn of val) {
       if (typeof fn !== 'function') {
@@ -59,8 +71,24 @@ export const assertHandlers = <H, P, Q, B, F, R>(val: any): val is ZodMiddleware
   return true;
 };
 
+export const assertUseSpec = <S, H, P, Q, B, F, R>(val: any): val is UseSpec<S, H, P, Q, B, F, R> => {
+  if (typeof val === 'object' && val['handler']) {
+    return true;
+  }
+
+  return false;
+};
+
+export const assertRouteFnSpec = <S, H, P, Q, B, F, R>(val: any): val is Spec<S, H, P, Q, B, F, R> => {
+  if (typeof val === 'object' && val['handler'] && val['path']) {
+    return true;
+  }
+
+  return false;
+};
+
 export const zFile = () => {
-  return z.instanceof(PersistentFile).or(z.instanceof(VolatileFile));
+  return z.instanceof(formidable.PersistentFile).or(z.instanceof(formidable.VolatileFile));
 };
 
 export const assertFormidableError = (val: any): val is InstanceType<typeof FormidableError> => {
@@ -71,17 +99,29 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
   return false;
 };
 
-export const createRouteSpec = <
-  Headers = ZodTypeAny,
-  Params = ZodTypeAny,
-  Query = ZodTypeAny,
-  Body = ZodTypeAny,
-  Files = ZodTypeAny,
-  Response = ZodTypeAny,
->(
-  spec: RouteSpec<Headers, Params, Query, Body, Files, Response>,
-): RouteSpec<Headers, Params, Query, Body, Files, Response> => {
+export const createRouteSpec = <State extends DefaultState, H, P, Q, B, F, R>(
+  spec: RouteSpec<State, H, P, Q, B, F, R>,
+): RouteSpec<State, H, P, Q, B, F, R> => {
   return spec;
+};
+
+export const createUseSpec = <S, H, P, Q, B, F, R>(
+  spec: UseSpec<S, H, P, Q, B, F, R>,
+): UseSpec<S, H, P, Q, B, F, R> => {
+  return spec;
+};
+
+export const routerSpecFactory = <State>() => {
+  const _createUseSpec = <H, P, Q, B, F, R>(spec: UseSpec<State, H, P, Q, B, F, R>) => {
+    return createUseSpec<State, H, P, Q, B, F, R>(spec);
+  };
+  const _createRouteSpec = <H, P, Q, B, F, R>(spec: RouteSpec<State, H, P, Q, B, F, R>) => {
+    return createRouteSpec<State, H, P, Q, B, F, R>(spec);
+  };
+  return {
+    createUseSpec: _createUseSpec,
+    createRouteSpec: _createRouteSpec,
+  };
 };
 
 export const methods: Method[] = [
