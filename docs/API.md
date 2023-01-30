@@ -228,7 +228,7 @@ const router = zodRouter();
 router.use(authMiddleware);
 ```
 
-## routerSpecFactory<State> ⇒ <code>{ createUseSpec, createRouteSpec }<code>
+## routerSpecFactory<State> ⇒ <code>{ createUseSpec, createRouteSpec }</code>
 
 Utility function used for importing/exporting routes and middlewares with type parameter `State` passed onto `ctx.state`
 
