@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.1.0
+
+### Minor Changes
+
+- 9674d3a: Add state helpers, fix esm bundling, more descriptive zod errors in response
+
 ## 1.0.4
 
 ### Patch Changes
