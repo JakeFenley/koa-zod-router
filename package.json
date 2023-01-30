@@ -10,7 +10,10 @@
     "import": "./dist/index.mjs",
     "types": "./dist/index.d.ts"
   },
-  "type": "commonjs",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jakefenley/koa-zod-router"
+  },
   "scripts": {
     "build": "rm -rf dist && tsup src/index.ts --format cjs,esm --dts",
     "build:turbo": "turbo run build",
