@@ -106,7 +106,7 @@ router.register({
 | [files]    | <code>Object</code> | zod validation for `ctx.request.files`                        |
 | [response] | <code>Object</code> | zod validation for setting `ctx.body` and `ctx.response.body` |
 
-#### zodRouter.use(spec) ⇒ <code>KoaRouter</code>
+### zodRouter.use(spec) ⇒ <code>KoaRouter</code>
 
 Use middleware with either [koa-router's implementation](https://github.com/ZijianHe/koa-router/blob/master/README.md#routerusepath-middleware--router) or optionally pass in a spec object for validation and type inference.
 
