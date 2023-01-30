@@ -1,8 +1,8 @@
-import { PersistentFile, VolatileFile, errors } from 'formidable';
+import formidable from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z } from 'zod';
 import { Method, RouteSpec, Spec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
-const { FormidableError } = errors;
+const { FormidableError } = formidable.errors;
 
 export const flatten = <S, H, P, Q, B, F, R>(
   middlewares: Array<ZodMiddleware<S, H, P, Q, B, F, R> | undefined>,
@@ -88,7 +88,7 @@ export const assertRouteFnSpec = <S, H, P, Q, B, F, R>(val: any): val is Spec<S,
 };
 
 export const zFile = () => {
-  return z.instanceof(PersistentFile).or(z.instanceof(VolatileFile));
+  return z.instanceof(formidable.PersistentFile).or(z.instanceof(formidable.VolatileFile));
 };
 
 export const assertFormidableError = (val: any): val is InstanceType<typeof FormidableError> => {

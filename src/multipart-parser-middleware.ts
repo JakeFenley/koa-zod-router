@@ -1,5 +1,5 @@
 import { DefaultContext, Next } from 'koa';
-import formidable, { errors } from 'formidable';
+import formidable from 'formidable';
 import { assertFormidableError } from './util';
 
 export const multipartParserMiddleware = (options?: formidable.Options) => {
