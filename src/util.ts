@@ -28,7 +28,7 @@ export const prepareMiddleware = <S, H, P, Q, B, F, R>(
 };
 
 export async function noopMiddleware(ctx: Context, next: Next) {
-  return void next();
+  await next();
 }
 
 export const assertPath = (val: any): val is string | RegExp => {

@@ -5,7 +5,8 @@ import { assertFormidableError } from './util';
 export const multipartParserMiddleware = (options?: formidable.Options) => {
   return async (ctx: DefaultContext, next: Next) => {
     if (!ctx.is('multipart')) {
-      return next();
+      await next();
+      return;
     }
 
     const form = formidable({ multiples: true, ...options });
