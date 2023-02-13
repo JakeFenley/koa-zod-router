@@ -27,7 +27,7 @@ describe('zodRouter', () => {
         },
         handler: [
           async (ctx, next) => {
-            next();
+            await next();
           },
         ],
       });
@@ -46,8 +46,47 @@ describe('zodRouter', () => {
       router.register({
         path: '/',
         method: ['patch', 'post'],
-        handler: (ctx) => {
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           const { test } = ctx.request.body;
+          ctx.cookies.set('foo', 'bar');
+          ctx.body = { success: Boolean(test) };
+        },
+        validate: {
+          body: z.object({ test: z.string() }),
+          response: z.object({ success: z.boolean() }),
+        },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .patch('/')
+        .send({ test: 'hello' })
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.body.success === true);
+        });
+
+      await request(app)
+        .post('/')
+        .send({ test: 'hello' })
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.body.success === true);
+        });
+    });
+
+    it('register allows for multiple methods', async () => {
+      const router = zodRouter();
+
+      router.register({
+        path: '/',
+        method: ['patch', 'post'],
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          const { test } = ctx.request.body;
+          ctx.cookies.set('foo', 'bar');
           ctx.body = { success: Boolean(test) };
         },
         validate: {
@@ -98,6 +137,31 @@ describe('zodRouter', () => {
           ctx.body = { success: true };
         },
         validate: { response: z.object({ success: z.boolean() }) },
+      });
+
+      router.register(spec);
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.body.success === true);
+        });
+    });
+
+    it('register should work as indended without validation-middleware', async () => {
+      const router = zodRouter();
+
+      const spec = createRouteSpec({
+        method: 'get',
+        path: '/',
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          ctx.cookies.set('foo', 'bar');
+          ctx.body = { success: true };
+        },
       });
 
       router.register(spec);
@@ -583,7 +647,8 @@ describe('zodRouter', () => {
       router.register({
         method: 'patch',
         path: '/',
-        handler: (ctx) => {
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           ctx.body = { test: ctx.request.files.test.toJSON().originalFilename };
         },
         validate: {
@@ -617,7 +682,8 @@ describe('zodRouter', () => {
       router.register({
         path: '/',
         method: 'post',
-        handler: (ctx) => {
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
           ctx.body = {
             date: ctx.request.query.date.toISOString(),
             nested_date: ctx.request.body.depth_1.depth_2.date.toDateString(),
