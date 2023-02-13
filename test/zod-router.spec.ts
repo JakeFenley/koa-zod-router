@@ -787,6 +787,49 @@ describe('zodRouter', () => {
   });
 
   describe('multipart', () => {
+    it('regular requests should work with multipart enables', async () => {
+      const router = zodRouter();
+
+      router.get({
+        path: '/',
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          ctx.body = { success: true };
+        },
+      });
+
+      router.get({
+        path: '/with-validation',
+        handler: async (ctx) => {
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+          if (ctx.request.query.test) {
+            ctx.body = { success: true };
+          }
+        },
+        validate: {
+          query: z.object({ test: z.string() }),
+          response: z.object({ success: z.boolean() }),
+        },
+      });
+
+      const app = createApp(router);
+
+      await request(app)
+        .get('/')
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.body.success === true);
+        });
+
+      await request(app)
+        .get('/with-validation?test=hello')
+        .then((res) => {
+          assert(res.status === 200);
+          assert(res.body.success === true);
+        });
+    });
+
     it('should be able to receive multiple values for fields and files', async () => {
       const router = zodRouter({
         formidable: {
