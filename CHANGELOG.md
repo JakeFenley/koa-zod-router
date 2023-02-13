@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.1.2
+
+### Patch Changes
+
+- 0df5a48: Fix broken async in noop middleware
+
 ## 1.1.1
 
 ### Patch Changes
