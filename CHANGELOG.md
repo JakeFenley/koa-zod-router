@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.1.3
+
+### Patch Changes
+
+- ffb3890: Update Dependencies, fix formidable types causing tsc errors in declaration file
+
 ## 1.1.2
 
 ### Patch Changes
