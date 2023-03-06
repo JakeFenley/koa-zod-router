@@ -1,7 +1,7 @@
+import type { default as PersistentFile } from 'formidable/PersistentFile';
 import formidable from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
 import { z } from 'zod';
-import { formidable_PersistentFile, formidable_VolatileFile } from './file-class-exports';
 import { Method, RouteSpec, Spec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
 const { FormidableError } = formidable.errors;
 
@@ -87,8 +87,8 @@ export const assertRouteFnSpec = <S, H, P, Q, B, F, R>(val: any): val is Spec<S,
 
   return false;
 };
-export const zFile = () => {
-  return z.instanceof(formidable_PersistentFile).or(z.instanceof(formidable_VolatileFile));
+export const zFile = (): z.ZodType<PersistentFile, z.ZodTypeDef, PersistentFile> => {
+  return z.instanceof(formidable.PersistentFile).or(z.instanceof(formidable.VolatileFile));
 };
 
 export const assertFormidableError = (val: any): val is InstanceType<typeof FormidableError> => {
