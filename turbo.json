@@ -9,7 +9,7 @@
       "inputs": ["src/**/*.ts", "test/**/*.ts"],
       "outputs": [".nyc_output/**", "coverage/**"]
     },
-    "lint:ci": {
+    "lint": {
       "dependsOn": ["build"],
       "inputs": ["src/**/*.ts", "test/**/*.ts"],
       "outputs": [".eslintcache"]
