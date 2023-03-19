@@ -4,7 +4,11 @@
     "build": {
       "outputs": ["dist/**"]
     },
-    "test": {},
-    "lint": {}
+    "test": {
+      "outputs": [".nyc_output/**", "coverage/**"]
+    },
+    "lint": {
+      "outputs": [".eslintcache"]
+    }
   }
 }
