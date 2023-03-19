@@ -2,6 +2,7 @@
   "$schema": "https://turbo.build/schema.json",
   "pipeline": {
     "build": {
+      "inputs": ["src/**/*.ts", "pnpm-lock.yaml", "tsconfig.json"],
       "outputs": ["dist/**"]
     },
     "test:ci": {
