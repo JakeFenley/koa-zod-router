@@ -44,14 +44,15 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: build
+        run: pnpm build:turbo
+
       - name: test
         run: pnpm test:turbo
       
       - name: lint
         run: pnpm lint:turbo
       
-      - name: build
-        run: pnpm build:turbo
 
       - name: coveralls
         uses: coverallsapp/github-action@1.1.3
