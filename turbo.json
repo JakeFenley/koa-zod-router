@@ -5,9 +5,13 @@
       "outputs": ["dist/**"]
     },
     "test": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.ts", "test/**/*.ts"],
       "outputs": [".nyc_output/**", "coverage/**"]
     },
     "lint": {
+      "dependsOn": ["build"],
+      "inputs": ["src/**/*.ts", "test/**/*.ts"],
       "outputs": [".eslintcache"]
     }
   }
