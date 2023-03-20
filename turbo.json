@@ -6,13 +6,11 @@
       "outputs": ["dist/**"]
     },
     "test:ci": {
-      "dependsOn": ["build"],
       "inputs": ["src/**/*.ts", "test/**/*.ts"],
       "outputs": [".nyc_output/**", "coverage/**"]
     },
     "lint": {
-      "dependsOn": ["build"],
-      "inputs": ["src/**/*.ts", "test/**/*.ts"],
+      "inputs": ["src/**/*.ts"],
       "outputs": [".eslintcache"]
     }
   }
