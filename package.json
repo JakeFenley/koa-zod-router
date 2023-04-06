@@ -69,11 +69,6 @@
     "typescript": "4.9.4"
   },
   "peerDependencies": {
-    "@koa/router": ">=12.0.0 <13.x",
-    "@types/formidable": ">=2.0.5 <3.x",
-    "@types/koa": ">=2.13.5 <3.x",
-    "@types/koa-bodyparser": ">=4.3.10 <5.x",
-    "@types/koa__router": ">=12.0.0 <13.x",
     "koa": ">=2.14.1 <3.x",
     "zod": ">=3.20.2 <4.x"
   },
