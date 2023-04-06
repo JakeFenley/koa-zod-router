@@ -67,9 +67,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       if (params instanceof ZodError) {
         inputErrors.push(params);
       } else {
-        Object.keys(params).forEach((key) => {
-          ctx.request.params[key] = params[key];
-        });
+        ctx.request.params = params;
       }
     }
 
@@ -77,9 +75,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       if (query instanceof ZodError) {
         inputErrors.push(query);
       } else {
-        Object.keys(query).forEach((key) => {
-          ctx.request.query[key] = query[key];
-        });
+        ctx.request.query = query;
       }
     }
 
@@ -87,9 +83,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       if (body instanceof ZodError) {
         inputErrors.push(body);
       } else {
-        Object.keys(body).forEach((key) => {
-          ctx.request.body[key] = body[key];
-        });
+        ctx.request.body = body;
       }
     }
 
@@ -97,9 +91,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       if (files instanceof ZodError) {
         inputErrors.push(files);
       } else {
-        Object.keys(files).forEach((key) => {
-          ctx.request.files[key] = files[key];
-        });
+        ctx.request.files = files;
       }
     }
 
