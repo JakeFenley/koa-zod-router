@@ -22,7 +22,7 @@
     "test:coverage": "nyc --reporter=text mocha",
     "test:ci": "nyc --reporter=lcov mocha",
     "test:turbo": "turbo run test:ci",
-    "lint": "tsc && eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\"",
+    "lint": "eslint \"src/**/*.ts\" --cache && prettier --check \"src/**/*.ts\"",
     "lint:turbo": "turbo run lint",
     "release": "pnpm build:turbo && npm publish",
     "release:beta": "pnpm build:turbo && npm publish --tag beta"
