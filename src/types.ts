@@ -5,6 +5,8 @@ import bodyParser from 'koa-bodyparser';
 import z, { ZodSchema } from 'zod';
 import zodRouter from './zod-router';
 
+export type { KoaRouter };
+
 export type Method =
   | 'acl'
   | 'bind'
