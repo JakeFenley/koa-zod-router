@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.1.4
+
+### Patch Changes
+
+- 8bc7684: Update deps, move internal type peer dependencies to dependencies
+
 ## 1.1.3
 
 ### Patch Changes
