@@ -729,6 +729,36 @@ describe('zodRouter', () => {
   });
 
   describe('options', () => {
+    it('continueOnError: true - should call next middleware in chain and handle the error', async () => {
+      const router = zodRouter({ zodRouter: { continueOnError: true } });
+
+      router.post(
+        '/',
+        async (ctx, next) => {
+          const { validationErrors } = ctx.request;
+
+          if (validationErrors) {
+            ctx.body = { error: true };
+            ctx.status = 420;
+          }
+          await next();
+        },
+        {
+          body: z.object({ test: z.array(z.boolean()) }),
+          response: z.object({ error: z.boolean() }),
+        },
+      );
+
+      const app = createApp(router);
+
+      const res = await request(app)
+        .post('/')
+        .send({ test: [1, 2, 3] });
+
+      assert(res.body?.error === true);
+      assert(res.status === 420);
+    });
+
     it('exposeResponseErrors: true - should send response validation errors in response body', async () => {
       const router = zodRouter({ zodRouter: { exposeResponseErrors: true } });
 
@@ -738,7 +768,7 @@ describe('zodRouter', () => {
 
       const res = await request(app).post('/');
 
-      assert(res.body?.error?.issues.length === 1);
+      assert(res.body?.error?.response.length === 1);
       assert(res.status === 500);
     });
 
@@ -760,7 +790,7 @@ describe('zodRouter', () => {
 
       router.delete('/', (ctx, next) => {}, {
         query: z.object({ test: z.string() }),
-        body: z.object({ hello: z.string() }),
+        body: z.object({ hello: z.string(), foo: z.string() }),
         headers: z.object({ 'x-test-header': z.string() }),
       });
 
@@ -768,7 +798,9 @@ describe('zodRouter', () => {
 
       const res = await request(app).delete('/');
 
-      assert(res.body?.error?.length === 3);
+      assert(res.body?.error?.headers.length === 1);
+      assert(res.body?.error?.query.length === 1);
+      assert(res.body?.error?.body.length === 2);
       assert(res.status === 400);
     });
 
