@@ -63,6 +63,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
 
     if (inputErrors.body || inputErrors.files || inputErrors.headers || inputErrors.params || inputErrors.query) {
       if (opts?.continueOnError) {
+        inputErrors.error = true;
         ctx.invalid = inputErrors;
       } else if (opts?.exposeRequestErrors) {
         ctx.response.status = 400;
@@ -81,6 +82,8 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     addParsedProps(ctx.request.query, query);
     addParsedProps(ctx.request.body, body);
     addParsedProps(ctx.request.files, files);
+
+    ctx.invalid = false;
 
     await next();
 

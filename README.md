@@ -18,6 +18,7 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 - Body parsing using [koa-bodyparser][]
 - Multipart parsing using [formidable][]
 - Wraps [@koa/router][], providing the same API but with typesafety and validation.
+- Custom validation error handling support
 - CJS and ESM support
 
 ## 🚀 Install
@@ -263,6 +264,35 @@ fileRouter.register({
   },
 });
 ```
+
+### Custom Validation Error Handling
+
+By enabling `continueOnError` you can bypass the default error handling done by the router's validation middleware and handle the errors the way you see fit.
+
+Simply add a middleware to detect if `ctx.invalid.error` is set to `true`, and then retrieve any ZodErrors from the `ctx.invalid` object as shown in the following example:
+
+```js
+import zodRouter from 'koa-zod-router';
+import { z } from 'zod';
+
+const router = zodRouter({ continueOnError: true });
+
+//... create a custom error handling middleware
+
+router.use(async (ctx, next) => {
+  // check if an error was thrown
+  if (ctx.invalid?.error) {
+    // deconstruct all of the ZodErrors from ctx.invalid
+    const { body, headers, query, params, files } = ctx.invalid;
+    //... handle ZodErrors
+  } else {
+    await next();
+  }
+});
+
+//... your routes
+```
+
 
 ## API Reference
 

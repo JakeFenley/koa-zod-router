@@ -47,10 +47,11 @@ export interface ZodRouterInvalid {
   params?: ZodError[];
   query?: ZodError[];
   files?: ZodError[];
+  error?: boolean;
 }
 
 export type ZodValidationError<T> = {
-  requestParameter: keyof ZodRouterInvalid;
+  requestParameter: 'body' | 'headers' | 'params' | 'query' | 'files';
   error: ZodError<T>[];
 };
 
