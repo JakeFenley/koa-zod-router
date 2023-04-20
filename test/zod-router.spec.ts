@@ -735,7 +735,6 @@ describe('zodRouter', () => {
       router.post(
         '/',
         async (ctx, next) => {
-          console.log(JSON.stringify(ctx.invalid));
           if (ctx.invalid?.body) {
             ctx.body = { error: ctx.invalid };
             ctx.status = 420;
