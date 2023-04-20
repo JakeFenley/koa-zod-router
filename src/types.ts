@@ -2,7 +2,7 @@ import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
 import formidable from 'formidable';
 import { Middleware, Response } from 'koa';
 import bodyParser from 'koa-bodyparser';
-import z, { ZodSchema } from 'zod';
+import z, { ZodError, ZodSchema } from 'zod';
 import zodRouter from './zod-router';
 
 export type Method =
@@ -41,6 +41,20 @@ export type Method =
   | 'unlock'
   | 'unsubscribe';
 
+export interface ZodRouterInvalid {
+  body?: ZodError[];
+  headers?: ZodError[];
+  params?: ZodError[];
+  query?: ZodError[];
+  files?: ZodError[];
+  error?: boolean;
+}
+
+export type ZodValidationError<T> = {
+  requestParameter: 'body' | 'headers' | 'params' | 'query' | 'files';
+  error: ZodError<T>[];
+};
+
 export interface ZodContext<Headers, Params, Query, Body, Files> {
   request: {
     body: Body;
@@ -49,6 +63,7 @@ export interface ZodContext<Headers, Params, Query, Body, Files> {
     query: Query;
     files: Files;
   };
+  invalid: ZodRouterInvalid;
 }
 
 export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {
@@ -109,6 +124,7 @@ export interface RouterOpts {
   formidable?: formidable.Options;
   koaRouter?: RouterOptions;
   zodRouter?: {
+    continueOnError?: boolean;
     enableMultipart?: boolean;
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;

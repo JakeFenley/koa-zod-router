@@ -10,5 +10,8 @@
     "sourceType": "module",
     "project": "./tsconfig.json"
   },
-  "plugins": ["@typescript-eslint", "prettier", "import"]
+  "plugins": ["@typescript-eslint", "prettier", "import"],
+  "rules": {
+    "no-console": "warn"
+  }
 }

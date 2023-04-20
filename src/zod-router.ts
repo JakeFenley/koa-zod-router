@@ -212,25 +212,22 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
 
   return {
     ...makeRouteMethods(),
-    get router() {
-      return _router;
-    },
     register,
-    // Delegated methods - we preserve KoaRouter type definitions with assertions
+    use,
+    router: _router,
+    opts: _router.opts,
+    params: _router.params,
+    stack: _router.stack,
     all: all as KoaRouter['all'],
     allowedMethods: allowedMethods as KoaRouter['allowedMethods'],
     match: match as KoaRouter['match'],
     methods: _router.methods as KoaRouter['methods'],
     middleware: middleware as KoaRouter['middleware'],
-    opts: _router.opts,
     param: param as KoaRouter['param'],
-    params: _router.params,
     prefix: prefix as KoaRouter['prefix'],
     redirect: redirect as KoaRouter['redirect'],
     route: route as KoaRouter['route'],
     routes: routes as KoaRouter['routes'],
-    stack: _router.stack,
-    use,
     url: url as KoaRouter['url'],
   } as const;
 };

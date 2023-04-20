@@ -1,7 +1,7 @@
 import { DefaultContext, Next } from 'koa';
-import { SafeParseReturnType, SafeParseSuccess, ZodError, ZodTypeAny } from 'zod';
-import { ValidationOptions, RouterOpts } from './types';
-import { assertValidation, noopMiddleware } from './util';
+import { ZodError, ZodTypeAny } from 'zod';
+import { ValidationOptions, RouterOpts, ZodRouterInvalid, ZodValidationError } from './types';
+import { assertValidation, assertZodValidationError, noopMiddleware } from './util';
 
 class ValidationError extends Error {
   constructor(error: {}) {
@@ -9,28 +9,32 @@ class ValidationError extends Error {
   }
 }
 
-const parsedSuccessful = <Input, Output>(
-  parsed: SafeParseReturnType<Input, Output>,
-): parsed is SafeParseSuccess<Output> => {
-  return parsed.success;
-};
-
 const validate = async <T>(
   data: unknown,
   schema: ZodTypeAny | undefined,
-  name: string,
-): Promise<ZodError<T> | Record<string, any> | undefined> => {
+  requestParameter: string,
+): Promise<ZodValidationError<T> | Record<string, any> | undefined> => {
   if (!schema) {
     return undefined;
   }
 
   const parsed = await schema.safeParseAsync(data);
-  if (!parsedSuccessful(parsed)) {
-    parsed.error.name = `${parsed.error.name}: ${name}`;
-    return parsed.error;
+  if (!parsed.success) {
+    return {
+      requestParameter,
+      error: parsed.error,
+    };
   }
 
   return parsed.data;
+};
+
+const addParsedProps = (ctxProp: Record<string, any>, parsed?: Record<string, any> | ZodError<unknown>) => {
+  if (parsed && !(parsed instanceof ZodError)) {
+    Object.entries(parsed).forEach(([k, v]) => {
+      ctxProp[k] = v;
+    });
+  }
 };
 
 export const validationMiddleware = <H, P, Q, B, F, R>(
@@ -42,93 +46,61 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
   }
 
   return async (ctx: DefaultContext, next: Next) => {
-    // Input validation
-    let inputErrors: ZodError[] = [];
-
-    const [headers, params, query, body, files] = await Promise.all([
-      validate(ctx.request.headers, validation.headers, 'Headers'),
-      validate(ctx.request.params, validation.params, 'Route parameters'),
-      validate(ctx.request.query, validation.query, 'Querystring'),
-      validate(ctx.request.body, validation.body, 'Request Body'),
-      validate(ctx.request.files, validation.files, 'Files'),
+    const validated = await Promise.all([
+      validate(ctx.request.headers, validation.headers, 'headers'),
+      validate(ctx.request.params, validation.params, 'params'),
+      validate(ctx.request.query, validation.query, 'query'),
+      validate(ctx.request.body, validation.body, 'body'),
+      validate(ctx.request.files, validation.files, 'files'),
     ]);
 
-    if (headers) {
-      if (headers instanceof ZodError) {
-        inputErrors.push(headers);
+    const inputErrors = validated.reduce((acc: ZodRouterInvalid, curr) => {
+      if (assertZodValidationError(curr)) {
+        acc[curr.requestParameter] = curr.error;
+      }
+      return acc;
+    }, {});
+
+    if (inputErrors.body || inputErrors.files || inputErrors.headers || inputErrors.params || inputErrors.query) {
+      if (opts?.continueOnError) {
+        inputErrors.error = true;
+        ctx.invalid = inputErrors;
+        await next();
+        return;
+      } else if (opts?.exposeRequestErrors) {
+        ctx.response.status = 400;
+        ctx.type = 'json';
+        ctx.body = { error: inputErrors };
+        ctx.app.emit('error', new ValidationError({ inputErrors }), ctx);
+        return;
       } else {
-        Object.keys(headers).forEach((key) => {
-          ctx.request.headers[key] = headers[key];
-        });
+        ctx.throw(400, 'VALIDATION_ERROR');
       }
     }
 
-    if (params) {
-      if (params instanceof ZodError) {
-        inputErrors.push(params);
-      } else {
-        Object.keys(params).forEach((key) => {
-          ctx.request.params[key] = params[key];
-        });
-      }
-    }
+    ctx.invalid = { error: false };
 
-    if (query) {
-      if (query instanceof ZodError) {
-        inputErrors.push(query);
-      } else {
-        Object.keys(query).forEach((key) => {
-          ctx.request.query[key] = query[key];
-        });
-      }
-    }
+    const [headers, params, query, body, files] = validated;
 
-    if (body) {
-      if (body instanceof ZodError) {
-        inputErrors.push(body);
-      } else {
-        Object.keys(body).forEach((key) => {
-          ctx.request.body[key] = body[key];
-        });
-      }
-    }
-
-    if (files) {
-      if (files instanceof ZodError) {
-        inputErrors.push(files);
-      } else {
-        Object.keys(files).forEach((key) => {
-          ctx.request.files[key] = files[key];
-        });
-      }
-    }
-
-    if (inputErrors.length && opts?.exposeRequestErrors) {
-      ctx.response.status = 400;
-      ctx.type = 'json';
-      ctx.body = { error: inputErrors };
-      ctx.app.emit('error', new ValidationError({ inputErrors }), ctx);
-
-      return;
-    }
-    if (inputErrors.length) {
-      ctx.throw(400, 'VALIDATION_ERROR');
-    }
+    addParsedProps(ctx.request.headers, headers);
+    addParsedProps(ctx.request.params, params);
+    addParsedProps(ctx.request.query, query);
+    addParsedProps(ctx.request.body, body);
+    addParsedProps(ctx.request.files, files);
 
     await next();
 
-    // Output validation
-    const output = await validate(ctx.body, validation.response, 'Response');
+    const output = await validate(ctx.body, validation.response, 'response');
 
     if (!output) {
       return;
     }
 
-    if (output instanceof ZodError) {
+    if (output.error instanceof ZodError) {
       if (opts?.exposeResponseErrors) {
         ctx.status = 500;
         ctx.type = 'json';
-        ctx.body = { error: output };
+        ctx.body = { error: { response: output.error } };
         ctx.app.emit('error', new ValidationError({ output }), ctx);
         return;
       }
@@ -136,7 +108,6 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       ctx.throw(500);
     } else {
       ctx.body = output;
-      ctx.response.body = output;
     }
   };
 };
