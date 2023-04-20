@@ -28,7 +28,7 @@ export const prepareMiddleware = <S, H, P, Q, B, F, R>(
   return flatten(input);
 };
 
-export async function noopMiddleware(ctx: Context, next: Next) {
+export async function noopMiddleware(_ctx: Context, next: Next) {
   await next();
 }
 

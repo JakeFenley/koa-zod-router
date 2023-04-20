@@ -22,11 +22,11 @@ describe('zodRouter', () => {
         name: 'post-example',
         method: 'post',
         path: '/post',
-        pre: async (ctx, next) => {
+        pre: async (_ctx, next) => {
           await next();
         },
         handler: [
-          async (ctx, next) => {
+          async (_ctx, next) => {
             await next();
           },
         ],
@@ -412,7 +412,7 @@ describe('zodRouter', () => {
       const router = zodRouter();
       router.redirect('/', '/dest');
 
-      router.get('/dest', (ctx) => {});
+      router.get('/dest', (_ctx) => {});
 
       const app = createApp(router);
 
@@ -735,17 +735,15 @@ describe('zodRouter', () => {
       router.post(
         '/',
         async (ctx, next) => {
-          const { validationErrors } = ctx.request;
-
-          if (validationErrors) {
-            ctx.body = { error: true };
+          console.log(JSON.stringify(ctx.invalid));
+          if (ctx.invalid?.body) {
+            ctx.body = { error: ctx.invalid };
             ctx.status = 420;
           }
           await next();
         },
         {
           body: z.object({ test: z.array(z.boolean()) }),
-          response: z.object({ error: z.boolean() }),
         },
       );
 
@@ -755,27 +753,27 @@ describe('zodRouter', () => {
         .post('/')
         .send({ test: [1, 2, 3] });
 
-      assert(res.body?.error === true);
+      assert(res.body?.error.body.issues.length === 3);
       assert(res.status === 420);
     });
 
     it('exposeResponseErrors: true - should send response validation errors in response body', async () => {
       const router = zodRouter({ zodRouter: { exposeResponseErrors: true } });
 
-      router.post('/', (ctx, next) => {}, { response: z.object({ test: z.boolean() }) });
+      router.post('/', (_ctx, _next) => {}, { response: z.object({ test: z.boolean() }) });
 
       const app = createApp(router);
 
       const res = await request(app).post('/');
 
-      assert(res.body?.error?.response.length === 1);
+      assert(res.body?.error?.response.issues.length === 1);
       assert(res.status === 500);
     });
 
     it('exposeResponseErrors: false - should not send response validation errors in response body', async () => {
       const router = zodRouter({ zodRouter: { exposeResponseErrors: false } });
 
-      router.patch('/', [(ctx, next) => {}], { response: z.object({ test: z.boolean() }) });
+      router.patch('/', [(_ctx, _next) => {}], { response: z.object({ test: z.boolean() }) });
 
       const app = createApp(router);
 
@@ -788,7 +786,7 @@ describe('zodRouter', () => {
     it('exposeRequestErrors: true - should send request validation errors in response body', async () => {
       const router = zodRouter({ zodRouter: { exposeRequestErrors: true } });
 
-      router.delete('/', (ctx, next) => {}, {
+      router.delete('/', (_ctx, _next) => {}, {
         query: z.object({ test: z.string() }),
         body: z.object({ hello: z.string(), foo: z.string() }),
         headers: z.object({ 'x-test-header': z.string() }),
@@ -798,16 +796,16 @@ describe('zodRouter', () => {
 
       const res = await request(app).delete('/');
 
-      assert(res.body?.error?.headers.length === 1);
-      assert(res.body?.error?.query.length === 1);
-      assert(res.body?.error?.body.length === 2);
+      assert(res.body?.error?.headers.issues.length === 1);
+      assert(res.body?.error?.query.issues.length === 1);
+      assert(res.body?.error?.body.issues.length === 2);
       assert(res.status === 400);
     });
 
     it('exposeRequestErrors: false - should not send request validation errors in response body', async () => {
       const router = zodRouter({ zodRouter: { exposeRequestErrors: false } });
 
-      router.put('/', (ctx, next) => {}, { query: z.object({ test: z.string() }) });
+      router.put('/', (_ctx, _next) => {}, { query: z.object({ test: z.string() }) });
 
       const app = createApp(router);
 

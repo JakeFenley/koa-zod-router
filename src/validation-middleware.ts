@@ -1,6 +1,6 @@
 import { DefaultContext, Next } from 'koa';
 import { ZodError, ZodTypeAny } from 'zod';
-import { ValidationOptions, RouterOpts } from './types';
+import { ValidationOptions, RouterOpts, ZodRouterInvalid, ZodValidationError } from './types';
 import { assertValidation, noopMiddleware } from './util';
 
 class ValidationError extends Error {
@@ -12,16 +12,18 @@ class ValidationError extends Error {
 const validate = async <T>(
   data: unknown,
   schema: ZodTypeAny | undefined,
-  name: string,
-): Promise<ZodError<T> | Record<string, any> | undefined> => {
+  requestParameter: string,
+): Promise<ZodValidationError<T> | Record<string, any> | undefined> => {
   if (!schema) {
     return undefined;
   }
 
   const parsed = await schema.safeParseAsync(data);
   if (!parsed.success) {
-    parsed.error.name = name;
-    return parsed.error;
+    return {
+      requestParameter,
+      error: parsed.error,
+    };
   }
 
   return parsed.data;
@@ -52,21 +54,21 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       validate(ctx.request.files, validation.files, 'files'),
     ]);
 
-    const inputErrors = validated.reduce((acc: ZodError[], curr) => {
-      if (curr instanceof ZodError) {
-        acc.push(curr);
+    const inputErrors = validated.reduce((acc: ZodValidationError<unknown>[], curr) => {
+      if (curr?.error instanceof ZodError) {
+        acc.push(curr as ZodValidationError<unknown>);
       }
       return acc;
     }, []);
 
     if (inputErrors.length) {
-      const errorObject = inputErrors.reduce((acc: Record<string, any>, curr) => {
-        acc[curr.name] = curr.issues;
+      const errorObject = inputErrors.reduce((acc: ZodRouterInvalid, curr) => {
+        acc[curr.requestParameter] = curr.error;
         return acc;
       }, {});
 
       if (opts?.continueOnError) {
-        ctx.request.validationErrors = errorObject;
+        ctx.invalid = errorObject;
       } else if (opts?.exposeRequestErrors) {
         ctx.response.status = 400;
         ctx.type = 'json';
@@ -93,11 +95,11 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       return;
     }
 
-    if (output instanceof ZodError) {
+    if (output.error instanceof ZodError) {
       if (opts?.exposeResponseErrors) {
         ctx.status = 500;
         ctx.type = 'json';
-        ctx.body = { error: { response: output.issues } };
+        ctx.body = { error: { response: output.error } };
         ctx.app.emit('error', new ValidationError({ output }), ctx);
         return;
       }
@@ -105,7 +107,6 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       ctx.throw(500);
     } else {
       ctx.body = output;
-      ctx.response.body = output;
     }
   };
 };

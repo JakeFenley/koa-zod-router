@@ -41,6 +41,19 @@ export type Method =
   | 'unlock'
   | 'unsubscribe';
 
+export interface ZodRouterInvalid {
+  body?: ZodError[];
+  headers?: ZodError[];
+  params?: ZodError[];
+  query?: ZodError[];
+  files?: ZodError[];
+}
+
+export type ZodValidationError<T> = {
+  requestParameter: keyof ZodRouterInvalid;
+  error: ZodError<T>[];
+};
+
 export interface ZodContext<Headers, Params, Query, Body, Files> {
   request: {
     body: Body;
@@ -48,8 +61,8 @@ export interface ZodContext<Headers, Params, Query, Body, Files> {
     params: Params;
     query: Query;
     files: Files;
-    validationErrors?: ZodError[];
   };
+  invalid?: ZodRouterInvalid;
 }
 
 export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {

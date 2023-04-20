@@ -8,7 +8,7 @@ import { UserState } from './types';
 const app = new Koa();
 
 const router = zodRouter<UserState>({
-  zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true, enableMultipart: true },
+  zodRouter: { exposeRequestErrors: true, exposeResponseErrors: true },
 });
 
 router.use(middlewareExample);

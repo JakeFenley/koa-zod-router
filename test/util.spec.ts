@@ -78,7 +78,7 @@ describe('assertHandlers', () => {
 
     const assertionTwo = assertHandlers(['str', () => {}, () => {}, () => {}]);
 
-    assert(!assertionOne);
+    assert(!assertionTwo);
   });
 
   it('should assert function as argument to be true', () => {
