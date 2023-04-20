@@ -1,7 +1,7 @@
 import { DefaultContext, Next } from 'koa';
 import { ZodError, ZodTypeAny } from 'zod';
 import { ValidationOptions, RouterOpts, ZodRouterInvalid, ZodValidationError } from './types';
-import { assertValidation, noopMiddleware } from './util';
+import { assertValidation, assertZodValidationError, noopMiddleware } from './util';
 
 class ValidationError extends Error {
   constructor(error: {}) {
@@ -54,25 +54,20 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       validate(ctx.request.files, validation.files, 'files'),
     ]);
 
-    const inputErrors = validated.reduce((acc: ZodValidationError<unknown>[], curr) => {
-      if (curr?.error instanceof ZodError) {
-        acc.push(curr as ZodValidationError<unknown>);
+    const inputErrors = validated.reduce((acc: ZodRouterInvalid, curr) => {
+      if (assertZodValidationError(curr)) {
+        acc[curr.requestParameter] = curr.error;
       }
       return acc;
-    }, []);
+    }, {});
 
-    if (inputErrors.length) {
-      const errorObject = inputErrors.reduce((acc: ZodRouterInvalid, curr) => {
-        acc[curr.requestParameter] = curr.error;
-        return acc;
-      }, {});
-
+    if (inputErrors.body || inputErrors.files || inputErrors.headers || inputErrors.params || inputErrors.query) {
       if (opts?.continueOnError) {
-        ctx.invalid = errorObject;
+        ctx.invalid = inputErrors;
       } else if (opts?.exposeRequestErrors) {
         ctx.response.status = 400;
         ctx.type = 'json';
-        ctx.body = { error: errorObject };
+        ctx.body = { error: inputErrors };
         ctx.app.emit('error', new ValidationError({ inputErrors }), ctx);
         return;
       } else {

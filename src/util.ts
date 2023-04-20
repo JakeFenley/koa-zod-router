@@ -1,8 +1,8 @@
 import type { default as PersistentFile } from 'formidable/PersistentFile';
 import formidable from 'formidable';
 import { Context, DefaultState, Middleware, Next } from 'koa';
-import { z } from 'zod';
-import { Method, RouteSpec, Spec, UseSpec, ValidationOptions, ZodMiddleware } from './types';
+import { ZodError, z } from 'zod';
+import { Method, RouteSpec, Spec, UseSpec, ValidationOptions, ZodMiddleware, ZodValidationError } from './types';
 const { FormidableError } = formidable.errors;
 
 export const flatten = <S, H, P, Q, B, F, R>(
@@ -96,6 +96,13 @@ export const assertFormidableError = (val: any): val is InstanceType<typeof Form
     return true;
   }
 
+  return false;
+};
+
+export const assertZodValidationError = <T>(val: any): val is ZodValidationError<T> => {
+  if (val?.error instanceof ZodError) {
+    return true;
+  }
   return false;
 };
 

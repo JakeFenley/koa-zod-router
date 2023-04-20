@@ -743,16 +743,51 @@ describe('zodRouter', () => {
         },
         {
           body: z.object({ test: z.array(z.boolean()) }),
+          headers: z.object({ cookie: z.string() }),
+          query: z.object({ query_test: z.coerce.date() }),
         },
       );
 
       const app = createApp(router);
 
       const res = await request(app)
-        .post('/')
+        .post('/?query_test=whoops')
         .send({ test: [1, 2, 3] });
 
       assert(res.body?.error.body.issues.length === 3);
+      assert(res.body?.error.query.issues.length === 1);
+      assert(res.body?.error.headers.issues.length === 1);
+      assert(res.status === 420);
+    });
+
+    it('continueOnError: true - should still work with exposeRequestErrors enabled', async () => {
+      const router = zodRouter({ zodRouter: { continueOnError: true, exposeRequestErrors: true } });
+
+      router.post(
+        '/',
+        async (ctx, next) => {
+          if (ctx.invalid?.body) {
+            ctx.body = { error: ctx.invalid };
+            ctx.status = 420;
+          }
+          await next();
+        },
+        {
+          body: z.object({ test: z.array(z.boolean()) }),
+          headers: z.object({ cookie: z.string() }),
+          query: z.object({ query_test: z.coerce.date() }),
+        },
+      );
+
+      const app = createApp(router);
+
+      const res = await request(app)
+        .post('/?query_test=whoops')
+        .send({ test: [1, 2] });
+
+      assert(res.body?.error.body.issues.length === 2);
+      assert(res.body?.error.query.issues.length === 1);
+      assert(res.body?.error.headers.issues.length === 1);
       assert(res.status === 420);
     });
 
