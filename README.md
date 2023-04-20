@@ -281,7 +281,7 @@ const router = zodRouter({ continueOnError: true });
 
 router.use(async (ctx, next) => {
   // check if an error was thrown
-  if (ctx.invalid?.error) {
+  if (ctx.invalid.error) {
     // deconstruct all of the ZodErrors from ctx.invalid
     const { body, headers, query, params, files } = ctx.invalid;
     //... handle ZodErrors
