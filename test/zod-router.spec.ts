@@ -735,7 +735,7 @@ describe('zodRouter', () => {
       router.post(
         '/',
         async (ctx, next) => {
-          if (ctx.invalid?.body) {
+          if (ctx.invalid.error) {
             ctx.body = { error: ctx.invalid };
             ctx.status = 420;
           }
@@ -766,7 +766,7 @@ describe('zodRouter', () => {
       router.post(
         '/',
         async (ctx, next) => {
-          if (ctx.invalid?.body) {
+          if (ctx.invalid.error) {
             ctx.body = { error: ctx.invalid };
             ctx.status = 420;
           }

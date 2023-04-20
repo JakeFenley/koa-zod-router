@@ -63,7 +63,7 @@ export interface ZodContext<Headers, Params, Query, Body, Files> {
     query: Query;
     files: Files;
   };
-  invalid?: ZodRouterInvalid;
+  invalid: ZodRouterInvalid;
 }
 
 export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {

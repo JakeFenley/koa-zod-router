@@ -65,6 +65,8 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
       if (opts?.continueOnError) {
         inputErrors.error = true;
         ctx.invalid = inputErrors;
+        await next();
+        return;
       } else if (opts?.exposeRequestErrors) {
         ctx.response.status = 400;
         ctx.type = 'json';
@@ -75,6 +77,9 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
         ctx.throw(400, 'VALIDATION_ERROR');
       }
     }
+
+    ctx.invalid = { error: false };
+
     const [headers, params, query, body, files] = validated;
 
     addParsedProps(ctx.request.headers, headers);
@@ -82,8 +87,6 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     addParsedProps(ctx.request.query, query);
     addParsedProps(ctx.request.body, body);
     addParsedProps(ctx.request.files, files);
-
-    ctx.invalid = false;
 
     await next();
 
