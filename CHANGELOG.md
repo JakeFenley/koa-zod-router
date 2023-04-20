@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.2.0
+
+### Minor Changes
+
+- 12e0a9c: Add continueOnError flag for custom validation error handling support
+
 ## 1.1.4
 
 ### Patch Changes
