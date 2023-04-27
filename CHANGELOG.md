@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 1.2.1
+
+### Patch Changes
+
+- 723f907: Move continueOnError to route specific option
+
 ## 1.2.0
 
 ### Minor Changes
