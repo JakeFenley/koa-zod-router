@@ -67,6 +67,7 @@ export interface ZodContext<Headers, Params, Query, Body, Files> {
 }
 
 export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {
+  continueOnError?: boolean;
   headers?: ZodSchema<Headers, z.ZodTypeDef, any>;
   body?: ZodSchema<Body, z.ZodTypeDef, any>;
   params?: ZodSchema<Params, z.ZodTypeDef, any>;
@@ -124,7 +125,6 @@ export interface RouterOpts {
   formidable?: formidable.Options;
   koaRouter?: RouterOptions;
   zodRouter?: {
-    continueOnError?: boolean;
     enableMultipart?: boolean;
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;

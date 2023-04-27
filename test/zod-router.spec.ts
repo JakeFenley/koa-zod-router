@@ -730,23 +730,31 @@ describe('zodRouter', () => {
 
   describe('options', () => {
     it('continueOnError: true - should call next middleware in chain and handle the error', async () => {
-      const router = zodRouter({ zodRouter: { continueOnError: true } });
+      const router = zodRouter();
 
-      router.post(
-        '/',
-        async (ctx, next) => {
-          if (ctx.invalid.error) {
-            ctx.body = { error: ctx.invalid };
-            ctx.status = 420;
-          }
-          await next();
-        },
-        {
+      router.register({
+        method: 'post',
+        path: '/',
+        handler: [
+          async (ctx, next) => {
+            if (ctx.invalid.error) {
+              ctx.body = { error: ctx.invalid };
+              ctx.status = 420;
+            } else {
+              await next();
+            }
+          },
+          async (ctx) => {
+            ctx.status = 455;
+          },
+        ],
+        validate: {
+          continueOnError: true,
           body: z.object({ test: z.array(z.boolean()) }),
           headers: z.object({ cookie: z.string() }),
           query: z.object({ query_test: z.coerce.date() }),
         },
-      );
+      });
 
       const app = createApp(router);
 
@@ -761,29 +769,38 @@ describe('zodRouter', () => {
     });
 
     it('continueOnError: true - should still work with exposeRequestErrors enabled', async () => {
-      const router = zodRouter({ zodRouter: { continueOnError: true, exposeRequestErrors: true } });
+      const router = zodRouter({ zodRouter: { exposeRequestErrors: true } });
 
-      router.post(
-        '/',
-        async (ctx, next) => {
-          if (ctx.invalid.error) {
-            ctx.body = { error: ctx.invalid };
-            ctx.status = 420;
-          }
-          await next();
-        },
-        {
+      router.register({
+        method: 'post',
+        path: '/',
+        handler: [
+          async (ctx, next) => {
+            if (ctx.invalid.error) {
+              ctx.body = { error: ctx.invalid };
+              ctx.status = 420;
+            } else {
+              await next();
+            }
+          },
+          async (ctx) => {
+            ctx.status = 433;
+          },
+        ],
+        validate: {
+          continueOnError: true,
           body: z.object({ test: z.array(z.boolean()) }),
           headers: z.object({ cookie: z.string() }),
           query: z.object({ query_test: z.coerce.date() }),
         },
-      );
+      });
 
       const app = createApp(router);
 
       const res = await request(app)
         .post('/?query_test=whoops')
         .send({ test: [1, 2] });
+      console.log(res.status, res.body);
 
       assert(res.body?.error.body.issues.length === 2);
       assert(res.body?.error.query.issues.length === 1);

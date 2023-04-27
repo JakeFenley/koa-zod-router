@@ -18,7 +18,7 @@
 | [enableMultipart]      | <code>Boolean</code> | `false` | Enable Multipart parser middleware, used for file uploads                                                                |
 | [exposeRequestErrors]  | <code>Boolean</code> | `false` | Send ZodErrors caused by client in response body                                                                         |
 | [exposeResponseErrors] | <code>Boolean</code> | `false` | Send ZodErrors caused by the server in response body                                                                     |
-| [continueOnError]      | <code>Boolean</code> | `false` | Bypass koa-zod-router's error handling to use a custom implementation. Overrides any value set for `exposeRequestErrors` |
+
 
 Please see [@koa/router](https://github.com/koajs/router/blob/master/API.md) docs for any methods not mentioned in this doc. Only methods that have been wrapped or overridden are mentioned here. All other methods are delegated to koa-router.
 
@@ -106,6 +106,7 @@ router.register({
 | [query]    | <code>Object</code> | zod validation for `ctx.request.query`                        |
 | [files]    | <code>Object</code> | zod validation for `ctx.request.files`                        |
 | [response] | <code>Object</code> | zod validation for setting `ctx.body` and `ctx.response.body` |
+| [continueOnError]      | <code>Boolean</code> | `false` | Bypass koa-zod-router's error handling to use a custom implementation. Overrides any value set for `exposeRequestErrors` |
 
 ### zodRouter.use(spec) ⇒ <code>KoaRouter</code>
 

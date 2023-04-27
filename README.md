@@ -157,15 +157,14 @@ import { specFactory } from './route-state';
 export const getUserRoute = specFactory.createRouteSpec({
   method: 'get',
   path: '/user/:id',
-  handler: (ctx) => {
+  handler: async (ctx) => {
     //.. our route has access to the ctx.state.user types now
-    ctx.state.user
+    ctx.state.user;
   },
   validate: {
-      /* validation here */
-    },
+    /* validation here */
   },
-);
+});
 ```
 
 `index.ts:`
@@ -204,7 +203,7 @@ When dealing with route parameters, query strings, and headers the incoming data
 router.register({
   path: '/users/:id',
   method: 'get',
-  handler: (ctx) => {
+  handler: async (ctx) => {
     console.log(typeof ctx.request.params.id);
     // 'number'
   },
@@ -222,7 +221,7 @@ As mentioned above type coercion can be very useful in a lot of situations, espe
 router.register({
   path: '/date',
   method: 'post',
-  handler: (ctx) => {
+  handler: async (ctx) => {
     const { date } = ctx.request.body;
     console.log(date instanceof Date);
     // true
@@ -251,7 +250,7 @@ const fileRouter = zodRouter({ zodRouter: { enableMultipart: true } });
 fileRouter.register({
   path: '/uploads',
   method: 'post',
-  handler: (ctx) => {
+  handler: async (ctx) => {
     const { file_one, multiple_files } = ctx.request.files;
     //...
   },
@@ -269,30 +268,41 @@ fileRouter.register({
 
 By enabling `continueOnError` you can bypass the default error handling done by the router's validation middleware and handle the errors the way you see fit.
 
-Simply add a middleware to detect if `ctx.invalid.error` is set to `true`, and then retrieve any ZodErrors from the `ctx.invalid` object as shown in the following example:
-
 ```js
 import zodRouter from 'koa-zod-router';
 import { z } from 'zod';
 
-const router = zodRouter({ continueOnError: true });
+const router = zodRouter();
 
-//... create a custom error handling middleware
+//... create a custom error handler
 
-router.use(async (ctx, next) => {
-  // check if an error was thrown
-  if (ctx.invalid.error) {
-    // deconstruct all of the ZodErrors from ctx.invalid
-    const { body, headers, query, params, files } = ctx.invalid;
-    //... handle ZodErrors
-  } else {
-    await next();
-  }
+router.register({
+  method: 'get',
+  path: '/foo',
+  handler: [
+    // error handler
+    async (ctx, next) => {
+      // check if an error was thrown
+      if (ctx.invalid.error) {
+        // destructure all of the ZodErrors from ctx.invalid
+        const { body, headers, query, params, files } = ctx.invalid;
+        //... handle ZodErrors
+      } else {
+        await next();
+      }
+    },
+    async (ctx, next) => {
+      // .. route handler
+    },
+  ],
+  validate: {
+    continueOnError: true,
+    body: z.object({
+      foo: z.string(),
+    }),
+  },
 });
-
-//... your routes
 ```
-
 
 ## API Reference
 
