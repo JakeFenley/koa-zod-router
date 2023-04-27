@@ -800,7 +800,6 @@ describe('zodRouter', () => {
       const res = await request(app)
         .post('/?query_test=whoops')
         .send({ test: [1, 2] });
-      console.log(res.status, res.body);
 
       assert(res.body?.error.body.issues.length === 2);
       assert(res.body?.error.query.issues.length === 1);
