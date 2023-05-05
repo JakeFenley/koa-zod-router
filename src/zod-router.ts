@@ -113,11 +113,21 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
       if (assertPath(spec.path)) {
         return _router.use(
           spec.path,
-          ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+          ...prepareMiddleware([
+            spec.pre,
+            validationMiddleware(spec.validate, opts?.zodRouter),
+            opts?.zodRouter?.validationErrorHandler,
+            spec.handler,
+          ]),
         );
       } else {
         return _router.use(
-          ...prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+          ...prepareMiddleware([
+            spec.pre,
+            validationMiddleware(spec.validate, opts?.zodRouter),
+            opts?.zodRouter?.validationErrorHandler,
+            spec.handler,
+          ]),
         );
       }
     }
@@ -170,7 +180,12 @@ const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
     _router.register(
       spec.path,
       methodsParam,
-      prepareMiddleware([spec.pre, validationMiddleware(spec.validate, opts?.zodRouter), spec.handler]),
+      prepareMiddleware([
+        spec.pre,
+        validationMiddleware(spec.validate, opts?.zodRouter),
+        opts?.zodRouter?.validationErrorHandler,
+        spec.handler,
+      ]),
       { name },
     );
 

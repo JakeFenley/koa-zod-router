@@ -1,6 +1,6 @@
 import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
 import formidable from 'formidable';
-import { Context, Middleware, Request, Response } from 'koa';
+import { Context, DefaultState, Middleware, Request, Response } from 'koa';
 import bodyParser from 'koa-bodyparser';
 import z, { ZodError, ZodSchema } from 'zod';
 import zodRouter from './zod-router';
@@ -120,6 +120,8 @@ export type RouterMethods = {
 
 export type ZodRouter = ReturnType<typeof zodRouter>;
 
+export type ValidationErrorHandler<S = DefaultState> = ZodMiddleware<S, any, any, any, any, any, any>;
+
 export interface RouterOpts {
   bodyParser?: bodyParser.Options;
   formidable?: formidable.Options;
@@ -128,5 +130,6 @@ export interface RouterOpts {
     enableMultipart?: boolean;
     exposeRequestErrors?: boolean;
     exposeResponseErrors?: boolean;
+    validationErrorHandler?: ValidationErrorHandler;
   };
 }

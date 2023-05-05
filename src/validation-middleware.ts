@@ -62,7 +62,7 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
     }, {});
 
     if (inputErrors.body || inputErrors.files || inputErrors.headers || inputErrors.params || inputErrors.query) {
-      if (validation?.continueOnError) {
+      if (validation?.continueOnError || opts?.validationErrorHandler) {
         inputErrors.error = true;
         ctx.invalid = inputErrors;
         await next();
