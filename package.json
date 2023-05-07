@@ -1,6 +1,6 @@
 {
   "name": "koa-zod-router",
-  "version": "1.2.1",
+  "version": "2.0.0-beta.1",
   "description": "",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -17,7 +17,7 @@
   "scripts": {
     "build": "rm -rf dist && tsup src/index.ts --format cjs,esm --dts",
     "build:turbo": "turbo run build",
-    "example": "ts-node-dev examples/index.ts",
+    "example": "ts-node-dev --project examples/tsconfig.json examples/index.ts",
     "test": "mocha",
     "test:coverage": "nyc --reporter=text mocha",
     "test:ci": "nyc --reporter=lcov mocha",
