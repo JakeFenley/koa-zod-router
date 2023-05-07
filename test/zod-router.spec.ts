@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 import { createRouteSpec, methods, zFile } from '../src/util';
 import KoaRouter from '@koa/router';
 import zodRouter from '../src/zod-router';
+import { ValidationErrorHandler } from '../src/types';
 import { createApp, request } from './test-utils';
 import { z } from 'zod';
 
@@ -804,6 +805,89 @@ describe('zodRouter', () => {
       assert(res.body?.error.body.issues.length === 2);
       assert(res.body?.error.query.issues.length === 1);
       assert(res.body?.error.headers.issues.length === 1);
+      assert(res.status === 420);
+    });
+
+    it('validationErrorHandler - should handle errors', async () => {
+      const validationErrorHandler: ValidationErrorHandler = async (ctx, next) => {
+        if (ctx.invalid.error) {
+          ctx.status = 420;
+          ctx.body = { error: 'test' };
+        } else {
+          await next();
+        }
+
+        return;
+      };
+
+      const router = zodRouter({
+        zodRouter: { validationErrorHandler },
+      });
+
+      router.use(async (ctx, next) => {
+        ctx.status = 500;
+        await next();
+      });
+
+      router.post(
+        '/',
+        async (ctx, next) => {
+          ctx.status = 200;
+          ctx.body = 'hello';
+          await next();
+        },
+        { body: z.object({ test: z.boolean() }) },
+      );
+
+      const app = createApp(router);
+
+      const res = await request(app).post('/');
+
+      assert(res.body.error === 'test');
+      assert(res.status === 420);
+    });
+
+    it('validationErrorHandler - should work with other flags set', async () => {
+      const validationErrorHandler: ValidationErrorHandler = async (ctx, next) => {
+        if (ctx.invalid.error) {
+          ctx.status = 420;
+          ctx.body = { error: 'test' };
+        } else {
+          await next();
+        }
+
+        return;
+      };
+
+      const router = zodRouter({
+        zodRouter: {
+          validationErrorHandler,
+          exposeRequestErrors: true,
+          exposeResponseErrors: true,
+          enableMultipart: true,
+        },
+      });
+
+      router.use(async (ctx, next) => {
+        ctx.status = 500;
+        await next();
+      });
+
+      router.post(
+        '/',
+        async (ctx, next) => {
+          ctx.status = 200;
+          ctx.body = 'hello';
+          await next();
+        },
+        { body: z.object({ test: z.boolean() }) },
+      );
+
+      const app = createApp(router);
+
+      const res = await request(app).post('/');
+
+      assert(res.body.error === 'test');
       assert(res.status === 420);
     });
 
