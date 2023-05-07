@@ -19,6 +19,7 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 - Multipart parsing using [formidable][]
 - Wraps [@koa/router][], providing the same API but with typesafety and validation.
 - Custom validation error handling support
+- RegExp path support
 - CJS and ESM support
 
 ## 🚀 Install
