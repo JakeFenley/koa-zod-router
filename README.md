@@ -264,8 +264,33 @@ fileRouter.register({
 });
 ```
 
-### Custom Validation Error Handling
+## Custom Validation Error Handling
+`koa-zod-router` allows users to implement router-wide error handling or route specific error handling. 
 
+### Router-wide error handling
+
+By passing a function `validationErrorHandler` into `zodRouter` options you can execute an error handler that occurs immediately after the validation-middleware does it's thing.
+
+```js
+import { ValidationErrorHandler } from 'koa-zod-router';
+
+const validationErrorHandler: ValidationErrorHandler = async (ctx, next) => {
+  if (ctx.invalid.error) {
+    ctx.status = 400;
+    ctx.body = 'hello';
+  } else {
+    await next();
+  }
+
+  return;
+};
+
+const router = zodRouter({
+  zodRouter: { exposeResponseErrors: true, validationErrorHandler },
+});
+```
+
+### Route specific error handling
 By enabling `continueOnError` you can bypass the default error handling done by the router's validation middleware and handle the errors the way you see fit.
 
 ```js
