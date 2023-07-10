@@ -47,13 +47,8 @@
     "@types/koa": "^2.13.6",
     "@types/node": "^18.16.19",
     "@types/supertest": "^2.0.12",
-<<<<<<< HEAD
-    "@typescript-eslint/eslint-plugin": "^5.59.9",
-    "@typescript-eslint/parser": "^5.59.9",
-=======
     "@typescript-eslint/eslint-plugin": "^5.61.0",
     "@typescript-eslint/parser": "^5.61.0",
->>>>>>> e5a4f8c (Bump deps)
     "coveralls": "^3.1.1",
     "eslint": "^8.44.0",
     "eslint-config-prettier": "^8.8.0",
@@ -68,11 +63,7 @@
     "supertest": "^6.3.3",
     "ts-node-dev": "^2.0.0",
     "tsup": "^6.7.0",
-<<<<<<< HEAD
-    "turbo": "^1.10.2",
-=======
     "turbo": "^1.10.7",
->>>>>>> e5a4f8c (Bump deps)
     "typescript": "5.0.4"
   },
   "peerDependencies": {
