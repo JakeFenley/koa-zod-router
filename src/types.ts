@@ -42,17 +42,17 @@ export type Method =
   | 'unsubscribe';
 
 export interface ZodRouterInvalid {
-  body?: ZodError[];
-  headers?: ZodError[];
-  params?: ZodError[];
-  query?: ZodError[];
-  files?: ZodError[];
+  body?: ZodError;
+  headers?: ZodError;
+  params?: ZodError;
+  query?: ZodError;
+  files?: ZodError;
   error?: boolean;
 }
 
 export type ZodValidationError<T> = {
   requestParameter: 'body' | 'headers' | 'params' | 'query' | 'files';
-  error: ZodError<T>[];
+  error: ZodError<T>;
 };
 
 export interface ZodContext<Headers, Params, Query, Body, Files> extends Context {
