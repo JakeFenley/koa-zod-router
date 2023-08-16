@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 2.1.0
+
+### Minor Changes
+
+- 5995387: Fix incorrect ZodError type for ctx.invalid
+
 ## 2.0.1
 
 ### Patch Changes
