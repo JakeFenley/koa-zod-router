@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 2.2.0
+
+### Minor Changes
+
+- 668bcd6: Bump dependencies
+
 ## 2.1.0
 
 ### Minor Changes
