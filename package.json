@@ -35,14 +35,14 @@
   "license": "MIT",
   "dependencies": {
     "@koa/router": "^12.0.1",
+    "@types/formidable": "^2.0.6",
+    "@types/koa-bodyparser": "^4.3.11",
+    "@types/koa__router": "^12.0.2",
     "formidable": "^2.1.2",
     "koa-bodyparser": "^4.4.1",
     "zod": "^3.22.4"
   },
   "devDependencies": {
-    "@types/formidable": "^2.0.6",
-    "@types/koa-bodyparser": "^4.3.11",
-    "@types/koa__router": "^12.0.2",
     "@changesets/cli": "^2.26.2",
     "@types/koa": "^2.13.10",
     "@types/node": "^18.18.6",
