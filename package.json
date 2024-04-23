@@ -38,7 +38,7 @@
     "@types/formidable": "^2.0.6",
     "@types/koa-bodyparser": "^4.3.11",
     "@types/koa__router": "^12.0.2",
-    "formidable": "^2.1.2",
+    "formidable": "^3.2.4",
     "koa-bodyparser": "^4.4.1",
     "zod": "^3.22.4"
   },

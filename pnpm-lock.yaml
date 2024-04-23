@@ -1,5 +1,9 @@
 lockfileVersion: '6.0'
 
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
 dependencies:
   '@koa/router':
     specifier: ^12.0.1
@@ -14,8 +18,8 @@ dependencies:
     specifier: ^12.0.2
     version: 12.0.2
   formidable:
-    specifier: ^2.1.2
-    version: 2.1.2
+    specifier: ^3.2.4
+    version: 3.2.4
   koa-bodyparser:
     specifier: ^4.4.1
     version: 4.4.1
@@ -1929,11 +1933,19 @@ packages:
     engines: {node: '>=8'}
     dev: true
 
+  /dezalgo@1.0.3:
+    resolution: {integrity: sha512-K7i4zNfT2kgQz3GylDw40ot9GAE47sFZ9EXHFSPP6zONLgH6kWXE0KWJchkbQJLBkRazq4APwZ4OwiFFlT95OQ==}
+    dependencies:
+      asap: 2.0.6
+      wrappy: 1.0.2
+    dev: false
+
   /dezalgo@1.0.4:
     resolution: {integrity: sha512-rXSP0bf+5n0Qonsb+SVVfNfIsimO4HEtmnIpPHY8Q1UCzKlQrDMfdobr8nJOOsRgWCyMRqeSBQzmWUMq7zvVig==}
     dependencies:
       asap: 2.0.6
       wrappy: 1.0.2
+    dev: true
 
   /diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
@@ -2530,6 +2542,15 @@ packages:
       hexoid: 1.0.0
       once: 1.4.0
       qs: 6.11.2
+    dev: true
+
+  /formidable@3.2.4:
+    resolution: {integrity: sha512-8/5nJsq+o2o1+Dryx1k5gLTDaw0dNE9kL4P3srKArO6zhoerGm42/R8zq+L5EkV7kckNTvJpJke0kI8JseL3RQ==}
+    dependencies:
+      dezalgo: 1.0.3
+      hexoid: 1.0.0
+      once: 1.4.0
+    dev: false
 
   /fresh@0.5.2:
     resolution: {integrity: sha512-zJ2mQYM18rEFOudeV4GShTGIQ7RbzA7ozbU9I/XBpm7kqgMywgmylMwXHxZJmkVoYkna9d2pVXVXPdYTP9ej8Q==}
