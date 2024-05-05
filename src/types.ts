@@ -41,12 +41,12 @@ export type Method =
   | 'unlock'
   | 'unsubscribe';
 
-export interface ZodRouterInvalid {
-  body?: ZodError;
-  headers?: ZodError;
-  params?: ZodError;
-  query?: ZodError;
-  files?: ZodError;
+export interface ZodRouterInvalid<Headers, Params, Query, Body, Files> {
+  body?: ZodError<Body>;
+  headers?: ZodError<Headers>;
+  params?: ZodError<Params>;
+  query?: ZodError<Query>;
+  files?: ZodError<Files>;
   error?: boolean;
 }
 
@@ -63,7 +63,7 @@ export interface ZodContext<Headers, Params, Query, Body, Files> extends Context
     query: Query;
     files: Files;
   } & Request;
-  invalid: ZodRouterInvalid;
+  invalid: ZodRouterInvalid<Headers, Params, Query, Body, Files>;
 }
 
 export type ValidationOptions<Headers, Params, Query, Body, Files, Response> = {
