@@ -1,5 +1,11 @@
 # koa-zod-router
 
+## 2.3.0
+
+### Minor Changes
+
+- d02006b: Adds schema types to ctx.invalid
+
 ## 2.2.0
 
 ### Minor Changes
