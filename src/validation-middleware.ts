@@ -1,6 +1,6 @@
 import { DefaultContext, Next } from 'koa';
 import { ZodError, ZodTypeAny } from 'zod';
-import { ValidationOptions, RouterOpts, ZodRouterInvalid, ZodValidationError } from './types';
+import { ValidationOptions, RouterOpts, ZodValidationError, ZodRouterInvalid } from './types';
 import { assertValidation, assertZodValidationError, noopMiddleware } from './util';
 
 class ValidationError extends Error {
@@ -23,7 +23,7 @@ const validate = async <T>(
     return {
       requestParameter,
       error: parsed.error,
-    };
+    } as ZodValidationError<T>;
   }
 
   return parsed.data;
@@ -47,19 +47,23 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
 
   return async (ctx: DefaultContext, next: Next) => {
     const validated = await Promise.all([
-      validate(ctx.request.headers, validation.headers, 'headers'),
-      validate(ctx.request.params, validation.params, 'params'),
-      validate(ctx.request.query, validation.query, 'query'),
-      validate(ctx.request.body, validation.body, 'body'),
-      validate(ctx.request.files, validation.files, 'files'),
+      validate<H>(ctx.request.headers, validation.headers, 'headers'),
+      validate<P>(ctx.request.params, validation.params, 'params'),
+      validate<Q>(ctx.request.query, validation.query, 'query'),
+      validate<B>(ctx.request.body, validation.body, 'body'),
+      validate<F>(ctx.request.files, validation.files, 'files'),
     ]);
 
-    const inputErrors = validated.reduce((acc: ZodRouterInvalid, curr) => {
-      if (assertZodValidationError(curr)) {
-        acc[curr.requestParameter] = curr.error;
-      }
-      return acc;
-    }, {});
+    const inputErrors = validated.reduce<ZodRouterInvalid<H, P, Q, B, F>>(
+      (acc, curr) => {
+        if (assertZodValidationError(curr)) {
+          (acc[curr.requestParameter] as typeof curr.error) = curr.error;
+        }
+
+        return acc;
+      },
+      { error: false },
+    );
 
     if (inputErrors.body || inputErrors.files || inputErrors.headers || inputErrors.params || inputErrors.query) {
       if (validation?.continueOnError || opts?.validationErrorHandler) {
@@ -90,13 +94,13 @@ export const validationMiddleware = <H, P, Q, B, F, R>(
 
     await next();
 
-    const output = await validate(ctx.body, validation.response, 'response');
+    const output = await validate<R>(ctx.body, validation.response, 'response');
 
     if (!output) {
       return;
     }
 
-    if (output.error instanceof ZodError) {
+    if (assertZodValidationError<R>(output)) {
       if (opts?.exposeResponseErrors) {
         ctx.status = 500;
         ctx.type = 'json';
