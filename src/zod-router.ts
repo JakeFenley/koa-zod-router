@@ -1,21 +1,21 @@
-import bodyParser from 'koa-bodyparser';
+import bodyParser from '@koa/bodyparser';
 import KoaRouter, { ParamMiddleware } from '@koa/router';
+import { DefaultContext, DefaultState } from 'koa';
+import { ZodTypeAny } from 'zod';
+import { multipartParserMiddleware } from './multipart-parser-middleware';
 import {
   Method,
   RegisterSpec,
-  Spec,
-  ValidationOptions,
   RouterMethods,
-  ZodMiddleware,
   RouterOpts,
   RouteSpec,
+  Spec,
   UseSpec,
+  ValidationOptions,
+  ZodMiddleware,
 } from './types';
 import { assertHandlers, assertPath, assertRouteFnSpec, assertUseSpec, methods, prepareMiddleware } from './util';
 import { validationMiddleware } from './validation-middleware';
-import { multipartParserMiddleware } from './multipart-parser-middleware';
-import { DefaultContext, DefaultState } from 'koa';
-import { ZodTypeAny } from 'zod';
 
 const zodRouter = <RouterState = DefaultState>(opts?: RouterOpts) => {
   const _router = new KoaRouter<RouterState>(opts?.koaRouter);

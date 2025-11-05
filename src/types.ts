@@ -1,7 +1,7 @@
+import type { BodyParserOptions } from '@koa/bodyparser/dist/body-parser.types';
 import KoaRouter, { LayerOptions, RouterOptions } from '@koa/router';
 import formidable from 'formidable';
 import { Context, DefaultState, Middleware, Request, Response } from 'koa';
-import bodyParser from 'koa-bodyparser';
 import z, { ZodError, ZodSchema } from 'zod';
 import zodRouter from './zod-router';
 
@@ -123,7 +123,7 @@ export type ZodRouter = ReturnType<typeof zodRouter>;
 export type ValidationErrorHandler<S = DefaultState> = ZodMiddleware<S, any, any, any, any, any, any>;
 
 export interface RouterOpts {
-  bodyParser?: bodyParser.Options;
+  bodyParser?: BodyParserOptions;
   formidable?: formidable.Options;
   koaRouter?: RouterOptions;
   zodRouter?: {

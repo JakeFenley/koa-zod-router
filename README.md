@@ -8,14 +8,14 @@ Inspired by koa-joi-router, this package aims to provide a similar feature-set w
 
 [zod]: https://github.com/colinhacks/zod
 [coercion]: https://zod.dev/?id=coercion-for-primitives
-[koa-bodyparser]: https://github.com/koajs/bodyparser
+[@koa/bodyparser]: https://github.com/koajs/bodyparser
 [formidable]: https://github.com/node-formidable/formidable
 [@koa/router]: https://github.com/koajs/router
 
 ## 🔥 Features:
 
 - Input/output validation and typesafety using [zod][]
-- Body parsing using [koa-bodyparser][]
+- Body parsing using [@koa/bodyparser][]
 - Multipart parsing using [formidable][]
 - Wraps [@koa/router][], providing the same API but with typesafety and validation.
 - Custom validation error handling support
@@ -266,7 +266,7 @@ fileRouter.register({
 ```
 
 ## Custom Validation Error Handling
-`koa-zod-router` allows users to implement router-wide error handling or route specific error handling. 
+`koa-zod-router` allows users to implement router-wide error handling or route specific error handling.
 
 ### Router-wide error handling
 

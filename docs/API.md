@@ -6,7 +6,7 @@
 
 | Param        | Type                | Description                                                                              |
 | ------------ | ------------------- | ---------------------------------------------------------------------------------------- |
-| [bodyParser] | <code>Object</code> | koa-bodyparser [options](https://github.com/koajs/bodyparser#options)                    |
+| [bodyParser] | <code>Object</code> | @koa/bodyparser [options](https://github.com/koajs/bodyparser?tab=readme-ov-file#options) |
 | [formidable] | <code>Object</code> | formidable [options](https://github.com/node-formidable/formidable#options)              |
 | [koaRouter]  | <code>Object</code> | @koa/router [options](https://github.com/koajs/router/blob/master/API.md#new-routeropts) |
 | [zodRouter]  | <code>Object</code> | koa-zod-router [options](#koa-zod-router-options)                                        |
