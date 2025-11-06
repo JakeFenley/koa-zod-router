@@ -1,3 +1,5 @@
+# This library is no longer maintained, and is not accepting pull requests.
+
 # ⚡ koa-zod-router ⚡
 
 Inspired by koa-joi-router, this package aims to provide a similar feature-set while leveraging Zod and Typescript to create typesafe routes and middlewares with built in I/O validation.
